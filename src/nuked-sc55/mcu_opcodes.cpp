@@ -255,7 +255,7 @@ void MCU_Jump_RTE(mcu_t& mcu, uint8_t operand)
     mcu.cp = (uint8_t)MCU_PopStack(mcu);
     mcu.pc = MCU_PopStack(mcu);
     mcu.ex_ignore = 1;
-}   
+}
 
 void MCU_Jump_Bcc(mcu_t& mcu, uint8_t operand)
 {
@@ -1149,7 +1149,7 @@ void MCU_Opcode_BNOTI(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
         uint32_t bit = opcode_reg | ((opcode & 1) << 3);
         MCU_SetStatus(mcu, (data & (1 << bit)) == 0, STATUS_Z);
         data ^= (1 << bit);
-        MCU_Operand_Write(mcu, data); 
+        MCU_Operand_Write(mcu, data);
     }
     else
     {
@@ -1486,7 +1486,7 @@ void MCU_Opcode_ADDX(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
     t1 = MCU_ADD_Common(mcu, t1, t2, C, mcu.operand_size);
     if (!Z)
         MCU_SetStatus(mcu, 0, STATUS_Z);
-        
+
     if (mcu.operand_size)
         mcu.r[opcode_reg] = t1;
     else

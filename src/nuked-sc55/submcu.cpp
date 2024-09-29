@@ -219,7 +219,7 @@ void SM_SysWrite(submcu_t& sm, uint32_t address, uint8_t data)
     else if (address >= 0xf8 && address < 0xfc)
     {
         sm.device_mode[SM_DEV_IPCM0 + (address & 3)] = data;
-        if ((address & 3) == 0) 
+        if ((address & 3) == 0)
         {
             sm.device_mode[SM_DEV_INT_REQUEST] |= 0x10;
             sm.device_mode[SM_DEV_SEMAPHORE] &= ~0x80;
@@ -512,7 +512,7 @@ void SM_Opcode_BBC_BBS(submcu_t& sm, uint8_t opcode)
     int8_t diff = SM_ReadAdvance(sm);
 
     int32_t set = (val >> bit) & 1;
-    
+
     if (set != type)
         sm.pc += diff;
 }
@@ -1312,7 +1312,7 @@ void SM_HandleInterrupt(submcu_t& sm)
 {
     if (sm.sr & SM_STATUS_I)
         return;
-    
+
     if ((sm.device_mode[SM_DEV_UART1_CTRL] & 0x8) != 0
         && (sm.device_mode[SM_DEV_INT_ENABLE] & 0x80) != 0
         && (sm.device_mode[SM_DEV_INT_REQUEST] & 0x80) != 0)
@@ -1450,7 +1450,7 @@ void SM_Update(submcu_t& sm, uint64_t cycles)
         }
 
         sm.cycles += 12 * 4; // FIXME
-        
+
         SM_UpdateTimer(sm);
         SM_UpdateUART(sm);
     }

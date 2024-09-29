@@ -329,7 +329,7 @@ inline void calc_tv(pcm_t& pcm, int e, int adjust, uint16_t *levelcur, int activ
     int speed = adjust & 0xff;
     int target = (adjust >> 8) & 0xff;
 
-                
+
     int w1 = (speed & 0xf0) == 0;
     int w2 = w1 || (speed & 0x10) != 0;
     int w3 = pcm.nfs &&
@@ -605,7 +605,7 @@ void PCM_Update(pcm_t& pcm, uint64_t cycles)
 
             pcm.ram1[30][0] = pcm.accum_l & pcm.config.write_mask;
             pcm.ram1[30][1] = pcm.accum_r & pcm.config.write_mask;
-            
+
 
             int32_t samp_l = (int32_t)((pcm.ram1[30][2] & ~pcm.config.write_mask) << 12);
             int32_t samp_r = (int32_t)((pcm.ram1[30][4] & ~pcm.config.write_mask) << 12);
@@ -1471,7 +1471,7 @@ void PCM_Update(pcm_t& pcm, uint64_t cycles)
 
             int rc0 = multi(sample3, (rc >> 8) & 255) >> 5; // reverb
             int rc1 = multi(sample3, (rc >> 0) & 255) >> 5; // chorus
-            
+
             // mix reverb/chorus?
             int slot2 = (slot == pcm.config.reg_slots - 1) ? 31 : slot + 1;
             switch (slot2)
