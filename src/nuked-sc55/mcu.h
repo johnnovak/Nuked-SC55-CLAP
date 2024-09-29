@@ -38,7 +38,6 @@
 #include <thread>
 #include <mutex>
 #include "mcu_interrupt.h"
-#include "cast.h"
 #include "audio.h"
 
 struct submcu_t;
