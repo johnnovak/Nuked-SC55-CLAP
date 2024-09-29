@@ -38,11 +38,6 @@
 
 struct mcu_t;
 
-struct SDL_Window;
-struct SDL_Renderer;
-struct SDL_Texture;
-union SDL_Event;
-
 static const int lcd_width_max = 1024;
 static const int lcd_height_max = 1024;
 
@@ -66,20 +61,9 @@ struct lcd_t {
 
     uint32_t buffer[lcd_height_max][lcd_width_max]{};
     uint32_t background[268][741]{};
-
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    SDL_Texture *texture = nullptr;
 };
 
 
-void LCD_LoadBack(lcd_t& lcd, const std::filesystem::path& path);
 void LCD_Init(lcd_t& lcd, mcu_t& mcu);
-bool LCD_CreateWindow(lcd_t& lcd);
-void LCD_UnInit(lcd_t& lcd);
 void LCD_Write(lcd_t& lcd, uint32_t address, uint8_t data);
 void LCD_Enable(lcd_t& lcd, uint32_t enable);
-bool LCD_QuitRequested(lcd_t& lcd);
-void LCD_Sync(void);
-void LCD_Update(lcd_t& lcd);
-void LCD_HandleEvent(lcd_t& lcd, const SDL_Event& sdl_event);
