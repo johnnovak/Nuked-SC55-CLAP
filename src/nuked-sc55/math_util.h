@@ -60,34 +60,3 @@ inline int32_t SaturatingAdd(int32_t a, int32_t b)
     int64_t result = (int64_t)a + (int64_t)b;
     return (int32_t)Clamp<int64_t>(result, INT32_MIN, INT32_MAX);
 }
-
-// Auto vectorizes in clang at -O2, gcc at -O3
-inline void HorizontalSatAddI16(int16_t* dest, int16_t* src_first, int16_t* src_last)
-{
-    while (src_first != src_last)
-    {
-        *dest = SaturatingAdd(*dest, *src_first);
-        ++src_first;
-        ++dest;
-    }
-}
-
-inline void HorizontalSatAddI32(int32_t* dest, int32_t* src_first, int32_t* src_last)
-{
-    while (src_first != src_last)
-    {
-        *dest = SaturatingAdd(*dest, *src_first);
-        ++src_first;
-        ++dest;
-    }
-}
-
-inline void HorizontalAddF32(float* dest, float* src_first, float* src_last)
-{
-    while (src_first != src_last)
-    {
-        *dest = *dest + *src_first;
-        ++src_first;
-        ++dest;
-    }
-}
