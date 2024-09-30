@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "nuke-sc55-clap",
+  "description": "Nuked SC-55 CLAP plugin",
+  "version": "0.1.0",
+
+  "dependencies": [
+    "speexdsp"
+  ],
+
+  "builtin-baseline": "3d89599850c8168fa4b560367b06c1be52645b20"
+}
