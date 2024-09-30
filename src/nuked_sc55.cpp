@@ -46,15 +46,17 @@ static void log_shutdown() {}
 
 //----------------------------------------------------------------------------
 
-NukedSc55::NukedSc55(const clap_plugin_t _plugin_class, const clap_host_t* _host)
+NukedSc55::NukedSc55(const clap_plugin_t _plugin_class,
+                     const clap_host_t* _host, const Model _model)
 {
     log_init();
     log("Constructor");
 
-    plugin_class = _plugin_class;
-    host         = _host;
-
+    plugin_class             = _plugin_class;
     plugin_class.plugin_data = this;
+
+    host  = _host;
+    model = _model;
 }
 
 const clap_plugin_t* NukedSc55::GetPluginClass()
@@ -109,9 +111,26 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
         return false;
     }
 
-    std::filesystem::path rom_dir = "/Users/jnovak/Library/Preferences/DOSBox/sc55-roms/sc55-1.21";
+    // TODO get path to plugin
+    // https://forums.steinberg.net/t/get-path-to-resources-folder/828223/4
 
-    if (!emu->LoadRoms(Romset::MK1, rom_dir)) {
+    const std::filesystem::path base_rom_dir = "/Users/jnovak/Library/Preferences/DOSBox/sc55-roms/";
+
+    auto romset  = Romset::MK1;
+    auto rom_dir = base_rom_dir;
+
+    switch (model) {
+    case Model::Sc55_v1_20: rom_dir += "sc55-v1.20"; break;
+    case Model::Sc55_v1_21: rom_dir += "sc55-v1.21"; break;
+    case Model::Sc55_v2_00: rom_dir += "sc55-v2.00"; break;
+    case Model::Sc55_mk2_v1_01:
+        romset = Romset::MK2;
+        rom_dir += "sc55-mk2-v1.01";
+        break;
+    default: assert(false);
+    }
+
+    if (!emu->LoadRoms(romset, rom_dir)) {
         log("emu->LoadRoms failed");
         emu.reset(nullptr);
         return false;
@@ -281,9 +300,9 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
 
         switch (event->type) {
 
-		// TODO probably best to get rid of CLAP_EVEN_NOTE_* handling and only
-		// deal with MIDI messages
-			/*
+            // TODO probably best to get rid of CLAP_EVEN_NOTE_* handling and
+            // only deal with MIDI messages
+            /*
         case CLAP_EVENT_NOTE_ON:
         case CLAP_EVENT_NOTE_OFF: {
             log("CLAP_EVENT_NOTE_*");
@@ -297,7 +316,8 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
             // The official advice is that hosts should prefer
             // CLAP_EVENT_NOTE_* messages, so we need to handle both.
             //
-            const auto note_event = reinterpret_cast<const clap_event_note_t*>(event);
+            const auto note_event = reinterpret_cast<const
+        clap_event_note_t*>(event);
 
             if (note_event->port_index == -1 || note_event->channel == -1 ||
                 note_event->key == -1) {
@@ -308,7 +328,8 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
                 (CLAP_EVENT_NOTE_OFF ? 0x80 : 0x90) + note_event->channel);
 
             const auto data1 = static_cast<uint8_t>(note_event->key);
-            const auto data2 = static_cast<uint8_t>(note_event->velocity * 127.0);
+            const auto data2 = static_cast<uint8_t>(note_event->velocity *
+        127.0);
 
             emu->PostMIDI(status);
             emu->PostMIDI(data1);

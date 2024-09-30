@@ -9,10 +9,14 @@
 #include "speex/speex_resampler.h"
 
 class NukedSc55 {
+
+public:
+    enum class Model { Sc55_v1_20, Sc55_v1_21, Sc55_v2_00, Sc55_mk2_v1_01 };
+
 public:
     // Init/shutdown
-    NukedSc55(const clap_plugin_t plugin_class, const clap_host_t* host);
-
+    NukedSc55(const clap_plugin_t plugin_class, const clap_host_t* host,
+              const Model model);
     const clap_plugin_t* GetPluginClass();
 
     bool Init(const clap_plugin* plugin_instance);
@@ -44,6 +48,8 @@ private:
     clap_plugin_t plugin_class         = {};
     const clap_host_t* host            = nullptr;
     const clap_plugin* plugin_instance = nullptr;
+
+    Model model = {};
 
     std::unique_ptr<Emulator> emu = nullptr;
 
