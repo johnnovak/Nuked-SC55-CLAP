@@ -46,11 +46,13 @@ static void log_shutdown() {}
 
 //----------------------------------------------------------------------------
 
+extern const char* plugin_path;
+
 NukedSc55::NukedSc55(const clap_plugin_t _plugin_class,
                      const clap_host_t* _host, const Model _model)
 {
     log_init();
-    log("Constructor");
+    log("Plugin path: %s", plugin_path);
 
     plugin_class             = _plugin_class;
     plugin_class.plugin_data = this;
