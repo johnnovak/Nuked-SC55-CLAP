@@ -140,6 +140,13 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
     emu->GetPCM().disable_oversampling = true;
     emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
+    // Speed up the devices' bootup delay
+    const size_t num_steps = (model == Model::Sc55_mk2_v1_01) ? 9'500'000 : 700'000;
+
+    for (size_t i = 0; i < num_steps; i++) {
+        MCU_Step(emu->GetMCU());
+    }
+
     emu->SetSampleCallback(receive_sample, this);
 
     render_sample_rate_hz = PCM_GetOutputFrequency(emu->GetPCM());
