@@ -71,38 +71,6 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     log("Init");
 
     plugin_instance = _plugin_instance;
-    return true;
-}
-
-void NukedSc55::Shutdown()
-{
-    log("Shutdown");
-
-    if (resampler) {
-        speex_resampler_destroy(resampler);
-        resampler = nullptr;
-    }
-    log_shutdown();
-}
-
-static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
-{
-    assert(userdata);
-    auto emu = reinterpret_cast<NukedSc55*>(userdata);
-
-    AudioFrame<float> out = {};
-    Normalize(in, out);
-
-    emu->PublishSample(out.left, out.right);
-}
-
-// TODO mk1 sample rate 32000 Hz
-// TODO mk2 sample rate 33103 Hz
-
-bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_count,
-                         const uint32_t max_frame_count)
-{
-    log("Activate");
 
     emu = std::make_unique<Emulator>();
 
@@ -137,6 +105,39 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
         emu.reset(nullptr);
         return false;
     }
+
+    return true;
+}
+
+void NukedSc55::Shutdown()
+{
+    log("Shutdown");
+
+    if (resampler) {
+        speex_resampler_destroy(resampler);
+        resampler = nullptr;
+    }
+    log_shutdown();
+}
+
+static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
+{
+    assert(userdata);
+    auto emu = reinterpret_cast<NukedSc55*>(userdata);
+
+    AudioFrame<float> out = {};
+    Normalize(in, out);
+
+    emu->PublishSample(out.left, out.right);
+}
+
+// TODO mk1 sample rate 32000 Hz
+// TODO mk2 sample rate 33103 Hz
+
+bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_count,
+                         const uint32_t max_frame_count)
+{
+    log("Activate");
 
     emu->Reset();
     emu->GetPCM().disable_oversampling = true;
