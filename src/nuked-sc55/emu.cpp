@@ -328,15 +328,15 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
 
     if (!r_ok)
     {
-        fprintf(stderr, "FATAL ERROR: One of required data ROM files is missing: %s.\n", errors_list.c_str());
-        fflush(stderr);
+//        fprintf(stderr, "FATAL ERROR: One of required data ROM files is missing: %s.\n", errors_list.c_str());
+//        fflush(stderr);
         return false;
     }
 
     if (!EMU_ReadStreamExact(s_rf[0], m_mcu->rom1, ROM1_SIZE))
     {
-        fprintf(stderr, "FATAL ERROR: Failed to read the mcu ROM1.\n");
-        fflush(stderr);
+//        fprintf(stderr, "FATAL ERROR: Failed to read the mcu ROM1.\n");
+//        fflush(stderr);
         return false;
     }
 
@@ -348,8 +348,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
     }
     else
     {
-        fprintf(stderr, "FATAL ERROR: Failed to read the mcu ROM2.\n");
-        fflush(stderr);
+//        fprintf(stderr, "FATAL ERROR: Failed to read the mcu ROM2.\n");
+//        fflush(stderr);
         return false;
     }
 
@@ -357,8 +357,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
     {
         if (!EMU_ReadStreamExact(s_rf[2], tempbuf, 0x100000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -366,8 +366,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
 
         if (!EMU_ReadStreamExact(s_rf[3], tempbuf, 0x100000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -375,8 +375,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
 
         if (!EMU_ReadStreamExact(s_rf[4], tempbuf, 0x100000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom3.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom3.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -386,8 +386,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
     {
         if (!EMU_ReadStreamExact(s_rf[2], tempbuf, 0x200000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -395,8 +395,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
 
         if (!EMU_ReadStreamExact(s_rf[3], tempbuf, 0x200000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -405,19 +405,19 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
         if (s_rf[4] && EMU_ReadStreamExact(s_rf[4], tempbuf, 0x800000))
             unscramble(tempbuf.data(), m_pcm->waverom_exp, 0x800000);
         else
-            fprintf(stderr, "WaveRom EXP not found, skipping it.\n");
+//            fprintf(stderr, "WaveRom EXP not found, skipping it.\n");
 
         if (s_rf[5] && EMU_ReadStreamExact(s_rf[5], tempbuf, 0x200000))
             unscramble(tempbuf.data(), m_pcm->waverom_card, 0x200000);
-        else
-            fprintf(stderr, "WaveRom PCM not found, skipping it.\n");
+//        else
+//            fprintf(stderr, "WaveRom PCM not found, skipping it.\n");
     }
     else
     {
         if (!EMU_ReadStreamExact(s_rf[2], tempbuf, 0x200000))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom1.\n");
+//            fflush(stderr);
             return false;
         }
 
@@ -427,8 +427,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
         {
             if (!EMU_ReadStreamExact(s_rf[3], tempbuf, 0x100000))
             {
-                fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
-                fflush(stderr);
+//                fprintf(stderr, "FATAL ERROR: Failed to read the WaveRom2.\n");
+//                fflush(stderr);
                 return false;
             }
 
@@ -437,8 +437,8 @@ bool Emulator::LoadRoms(Romset romset, const std::filesystem::path& base_path)
 
         if (s_rf[4] && !EMU_ReadStreamExact(s_rf[4], m_sm->rom, ROMSM_SIZE))
         {
-            fprintf(stderr, "FATAL ERROR: Failed to read the sub mcu ROM.\n");
-            fflush(stderr);
+//            fprintf(stderr, "FATAL ERROR: Failed to read the sub mcu ROM.\n");
+//            fflush(stderr);
             return false;
         }
     }

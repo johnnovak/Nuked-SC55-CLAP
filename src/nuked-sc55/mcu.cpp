@@ -40,7 +40,7 @@
 
 void MCU_ErrorTrap(mcu_t& mcu)
 {
-    fprintf(stderr, "%.2x %.4x\n", mcu.cp, mcu.pc);
+//    fprintf(stderr, "%.2x %.4x\n", mcu.cp, mcu.pc);
 }
 
 uint8_t RCU_Read(void)
@@ -148,7 +148,7 @@ READ_RCU:
             goto READ_RCU;
     }
     // TODO: really unreachable? maybe addressed upstream later?
-    fprintf(stderr, "PANIC: reached end of MCU_AnalogReadPin\n");
+//    fprintf(stderr, "PANIC: reached end of MCU_AnalogReadPin\n");
     exit(1);
 }
 
@@ -449,7 +449,7 @@ uint8_t MCU_Read(mcu_t& mcu, uint32_t address)
                 }
                 else
                 {
-                    fprintf(stderr, "Unknown read %x\n", address);
+//                    fprintf(stderr, "Unknown read %x\n", address);
                     ret = 0xff;
                 }
                 //
@@ -505,7 +505,7 @@ uint8_t MCU_Read(mcu_t& mcu, uint32_t address)
                 }
                 else
                 {
-                    fprintf(stderr, "Unknown read %x\n", address);
+//                    fprintf(stderr, "Unknown read %x\n", address);
                     ret = 0xff;
                 }
                 //
@@ -628,8 +628,8 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                     }
                     else if (address == (base | 0x402))
                         mcu.ga_int_enable = (value << 1);
-                    else
-                        fprintf(stderr, "Unknown write %x %x\n", address, value);
+//                    else
+//                        fprintf(stderr, "Unknown write %x %x\n", address, value);
                     //
                     // e400: always 4?
                     // e401: SC0-6?
@@ -664,7 +664,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                 }
                 else
                 {
-                    fprintf(stderr, "Unknown write %x %x\n", address, value);
+//                    fprintf(stderr, "Unknown write %x %x\n", address, value);
                 }
             }
             else
@@ -707,7 +707,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                 }
                 else
                 {
-                    fprintf(stderr, "Unknown write %x %x\n", address, value);
+//                    fprintf(stderr, "Unknown write %x %x\n", address, value);
                 }
             }
         }
@@ -717,7 +717,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
         }
         else
         {
-            fprintf(stderr, "Unknown write %x %x\n", address, value);
+//            fprintf(stderr, "Unknown write %x %x\n", address, value);
         }
     }
     else if (page == 5 && mcu.is_mk1)
@@ -738,7 +738,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
     }
     else
     {
-        fprintf(stderr, "Unknown write %x %x\n", (page << 16) | address, value);
+//        fprintf(stderr, "Unknown write %x %x\n", (page << 16) | address, value);
     }
 }
 

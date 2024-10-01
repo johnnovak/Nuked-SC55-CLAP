@@ -77,7 +77,7 @@ enum {
 
 void SM_ErrorTrap(submcu_t& sm)
 {
-    fprintf(stderr, "%.4x\n", sm.pc);
+//    fprintf(stderr, "%.4x\n", sm.pc);
 }
 
 uint8_t SM_Read(submcu_t& sm, uint16_t address)
@@ -143,7 +143,7 @@ uint8_t SM_Read(submcu_t& sm, uint16_t address)
     }
     else
     {
-        fprintf(stderr, "sm: unknown read %x\n", address);
+//        fprintf(stderr, "sm: unknown read %x\n", address);
         return 0;
     }
 }
@@ -203,7 +203,7 @@ void SM_Write(submcu_t& sm, uint16_t address, uint8_t data)
     }
     else
     {
-        fprintf(stderr, "sm: unknown write %x %x\n", address, data);
+//        fprintf(stderr, "sm: unknown write %x %x\n", address, data);
     }
 }
 
@@ -244,7 +244,7 @@ void SM_SysWrite(submcu_t& sm, uint32_t address, uint8_t data)
     }
     else
     {
-        fprintf(stderr, "sm: unknown sys write %x %x\n", address, data);
+//        fprintf(stderr, "sm: unknown sys write %x %x\n", address, data);
     }
 }
 
@@ -285,7 +285,7 @@ uint8_t SM_SysRead(submcu_t& sm, uint32_t address)
     }
     else
     {
-        fprintf(stderr, "sm: unknown sys read %x\n", address);
+//        fprintf(stderr, "sm: unknown sys read %x\n", address);
         return 0;
     }
 }
