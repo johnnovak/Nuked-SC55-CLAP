@@ -6,7 +6,7 @@
 
 #include "nuked_sc55.h"
 
-// #define DEBUG
+#define DEBUG
 
 //----------------------------------------------------------------------------
 // Simple debug logging
@@ -55,7 +55,8 @@ NukedSc55::NukedSc55(const clap_plugin_t _plugin_class,
     log_init();
     log("Plugin path: %s", plugin_path);
 
-    plugin_class             = _plugin_class;
+    plugin_class = _plugin_class;
+
     plugin_class.plugin_data = this;
 
     host  = _host;
@@ -243,6 +244,8 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         const auto num_frames_to_render = static_cast<int>(
             static_cast<double>(next_event_frame - curr_frame) * resample_ratio);
 
+        log("num_frames_to_render: %d", num_frames_to_render);
+
         // Render samples until the next event
         RenderAudio(num_frames_to_render);
 
@@ -256,8 +259,7 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         ResampleAndPublishFrames(num_frames, out_left, out_right);
 
     } else {
-        assert(render_buf.size() == num_frames);
-
+        log("*** render_buf.size(): %d, num_frames; %d", render_buf.size(), num_frames);
         for (size_t i = 0; i < num_frames; ++i) {
             out_left[i]  = render_buf[0][i];
             out_right[i] = render_buf[1][i];
