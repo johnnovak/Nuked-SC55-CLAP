@@ -26,6 +26,7 @@ static void _log(const char* fmt, ...)
 
     vfprintf(logfile, fmt, args);
     fprintf(logfile, "\n");
+    fflush(logfile);
 
     va_end(args);
 }
@@ -134,10 +135,14 @@ static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
 // TODO mk1 sample rate 32000 Hz
 // TODO mk2 sample rate 33103 Hz
 
-bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_count,
+bool NukedSc55::Activate(const double requested_sample_rate,
+                         const uint32_t min_frame_count,
                          const uint32_t max_frame_count)
 {
-    log("Activate");
+    log("Activate: requested_sample_rate: %g, min_frame_count: %d, max_frame_count: %d",
+        requested_sample_rate,
+        min_frame_count,
+        max_frame_count);
 
     emu->Reset();
     emu->GetPCM().disable_oversampling = true;
@@ -156,10 +161,10 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
 
     log("render_sample_rate_hz: %g", render_sample_rate_hz);
 
-    if (output_sample_rate_hz != render_sample_rate_hz) {
+    if (requested_sample_rate != render_sample_rate_hz) {
         do_resample = true;
 
-        output_sample_rate_hz = sample_rate;
+        output_sample_rate_hz = requested_sample_rate;
 
         // Initialise Speex resampler
         resample_ratio = render_sample_rate_hz / output_sample_rate_hz;
@@ -179,8 +184,8 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
         const auto max_render_buf_size = static_cast<size_t>(
             static_cast<double>(max_frame_count) * resample_ratio * 1.10f);
 
-        render_buf[0].resize(max_render_buf_size);
-        render_buf[1].resize(max_render_buf_size);
+        render_buf[0].reserve(max_render_buf_size);
+        render_buf[1].reserve(max_render_buf_size);
 
     } else {
         do_resample = false;
@@ -188,8 +193,8 @@ bool NukedSc55::Activate(const double sample_rate, const uint32_t min_frame_coun
         output_sample_rate_hz = render_sample_rate_hz;
         resample_ratio        = 1.0;
 
-        render_buf[0].resize(max_frame_count);
-        render_buf[1].resize(max_frame_count);
+        render_buf[0].reserve(max_frame_count);
+        render_buf[1].reserve(max_frame_count);
     }
 
     log("do_resample: %s", do_resample ? "true" : "false");
@@ -210,6 +215,7 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
 
     const uint32_t num_frames = process->frames_count;
     const uint32_t num_events = process->in_events->size(process->in_events);
+    log("--- num_frames: %d, num_events: %d", num_frames, num_events);
 
     uint32_t event_index      = 0;
     uint32_t next_event_frame = (num_events == 0) ? num_frames : 0;
@@ -250,6 +256,8 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         ResampleAndPublishFrames(num_frames, out_left, out_right);
 
     } else {
+        assert(render_buf.size() == num_frames);
+
         for (size_t i = 0; i < num_frames; ++i) {
             out_left[i]  = render_buf[0][i];
             out_right[i] = render_buf[1][i];
