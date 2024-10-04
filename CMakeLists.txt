@@ -16,7 +16,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # TODO
 
 else ()
-    add_compile_options(-Wall -Wextra -Wno-unused-parameter -O3)
+    add_compile_options(-g -Wall -Wextra -Wno-unused-parameter -O3)
 endif ()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
