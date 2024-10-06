@@ -95,7 +95,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     case Model::Sc55_v1_20: rom_dir += "sc55-v1.20"; break;
     case Model::Sc55_v1_21: rom_dir += "sc55-v1.21"; break;
     case Model::Sc55_v2_00: rom_dir += "sc55-v2.00"; break;
-    case Model::Sc55_mk2_v1_01:
+    case Model::Sc55mk2_v1_01:
         romset = Romset::MK2;
         rom_dir += "sc55-mk2-v1.01";
         break;
@@ -150,7 +150,7 @@ bool NukedSc55::Activate(const double requested_sample_rate,
     emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
     // Speed up the devices' bootup delay
-    const size_t num_steps = (model == Model::Sc55_mk2_v1_01) ? 9'500'000 : 700'000;
+    const size_t num_steps = (model == Model::Sc55mk2_v1_01) ? 9'500'000 : 700'000;
 
     for (size_t i = 0; i < num_steps; i++) {
         MCU_Step(emu->GetMCU());

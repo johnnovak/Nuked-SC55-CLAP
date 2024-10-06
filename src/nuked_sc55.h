@@ -11,7 +11,7 @@
 class NukedSc55 {
 
 public:
-    enum class Model { Sc55_v1_20, Sc55_v1_21, Sc55_v2_00, Sc55_mk2_v1_01 };
+    enum class Model { Sc55_v1_20, Sc55_v1_21, Sc55_v2_00, Sc55mk2_v1_01 };
 
 public:
     // Init/shutdown

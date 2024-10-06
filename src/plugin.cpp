@@ -54,16 +54,16 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v2_00 = {
     .description  = "Roland SC-55 v2.00 MIDI sound module emulation",
     .features     = Features};
 
-static const clap_plugin_descriptor_t plugin_descriptor_sc55_mk2_v1_01 = {
+static const clap_plugin_descriptor_t plugin_descriptor_sc55mk2_v1_01 = {
     .clap_version = CLAP_VERSION_INIT,
-    .id           = "net.johnnovak.nuked_sc55.sc55_mk2_v1_01",
-    .name         = "Nuked SC-55 -- Roland SC-55 mk2 v1.01",
+    .id           = "net.johnnovak.nuked_sc55.sc55mk2_v1_01",
+    .name         = "Nuked SC-55 -- Roland SC-55mk2 v1.01",
     .vendor       = Vendor,
     .url          = Url,
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 mk2 v1.01 MIDI sound module emulation",
+    .description  = "Roland SC-55mk2 v1.01 MIDI sound module emulation",
     .features     = Features};
 
 //////////////////////////////////////////////////////////////////////////////
@@ -290,9 +290,9 @@ static const clap_plugin_t my_plugin_class_sc55_v2_00 = {
 //----------------------------------------------------------------------------
 // SC-55 mk2 v1.01
 //----------------------------------------------------------------------------
-static const clap_plugin_t my_plugin_class_sc55_mk2_v1_01 = {
+static const clap_plugin_t my_plugin_class_sc55mk2_v1_01 = {
 
-    .desc = &plugin_descriptor_sc55_mk2_v1_01,
+    .desc = &plugin_descriptor_sc55mk2_v1_01,
 
     .plugin_data = nullptr,
 
@@ -356,7 +356,7 @@ static const clap_plugin_factory_t plugin_factory = {
             return &plugin_descriptor_sc55_v2_00;
 
         } else if (index == 3) {
-            return &plugin_descriptor_sc55_mk2_v1_01;
+            return &plugin_descriptor_sc55mk2_v1_01;
 
         } else {
             return nullptr;
@@ -386,10 +386,10 @@ static const clap_plugin_factory_t plugin_factory = {
                                        host,
                                        NukedSc55::Model::Sc55_v2_00);
 
-        } else if (strcmp(plugin_id, plugin_descriptor_sc55_mk2_v1_01.id) == 0) {
-            the_plugin = new NukedSc55(my_plugin_class_sc55_mk2_v1_01,
+        } else if (strcmp(plugin_id, plugin_descriptor_sc55mk2_v1_01.id) == 0) {
+            the_plugin = new NukedSc55(my_plugin_class_sc55mk2_v1_01,
                                        host,
-                                       NukedSc55::Model::Sc55_mk2_v1_01);
+                                       NukedSc55::Model::Sc55mk2_v1_01);
         } else {
             return nullptr;
         }
