@@ -13,10 +13,10 @@ constexpr auto Vendor  = "John Novak";
 constexpr auto Url     = "https://github.com/johnnovak/Nuked-SC55-CLAP";
 constexpr auto Version = "0.1.0";
 
-constexpr auto Features = (const char*[]){CLAP_PLUGIN_FEATURE_INSTRUMENT,
-                                          CLAP_PLUGIN_FEATURE_SYNTHESIZER,
-                                          CLAP_PLUGIN_FEATURE_STEREO,
-                                          nullptr};
+const char *Features[] = {CLAP_PLUGIN_FEATURE_INSTRUMENT,
+                          CLAP_PLUGIN_FEATURE_SYNTHESIZER,
+                          CLAP_PLUGIN_FEATURE_STEREO,
+                          nullptr};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_20 = {
     .clap_version = CLAP_VERSION_INIT,
