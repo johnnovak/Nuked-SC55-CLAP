@@ -39,7 +39,12 @@ add_library(NukedSc55Clap MODULE
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # TODO
+    target_link_options(NukedSc55Clap PRIVATE /EXPORT:clap_entry)
+    set_target_properties(NukedSc55Clap PROPERTIES SUFFIX ".clap" PREFIX "")
+
+    #add_compile_options(
+    #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
+    #)
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set_target_properties(NukedSc55Clap PROPERTIES
@@ -69,7 +74,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     )
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # TODO
+    target_link_libraries(NukedSc55Clap PRIVATE -Wl,--version-script=${CMAKE_SOURCE_DIR}/resources/linux/plug.version)
+    target_link_libraries(NukedSc55Clap PRIVATE -Wl,-z,defs)
+    set_target_properties(NukedSc55Clap PROPERTIES SUFFIX ".clap" PREFIX "")
 
 endif ()
 
