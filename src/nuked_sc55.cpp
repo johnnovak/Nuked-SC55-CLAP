@@ -6,11 +6,13 @@
 
 #include "nuked_sc55.h"
 
-#define DEBUG
+// #define DEBUG
 
 //----------------------------------------------------------------------------
 // Simple debug logging
-// #ifdef DEBUG
+#ifdef DEBUG
+
+#include <cstdarg>
 
 static FILE* logfile = nullptr;
 
