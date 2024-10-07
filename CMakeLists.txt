@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules/")
 
+set(VCPKG_LIBRARY_LINKAGE static)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # TODO
@@ -39,8 +40,11 @@ add_library(NukedSc55Clap MODULE
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_options(NukedSc55Clap PRIVATE /EXPORT:clap_entry)
-    set_target_properties(NukedSc55Clap PROPERTIES SUFFIX ".clap" PREFIX "")
+	#    target_link_options(NukedSc55Clap PRIVATE /EXPORT:clap_entry)
+	set_target_properties(NukedSc55Clap PROPERTIES
+		OUTPUT_NAME NukedSC55
+		SUFFIX ".clap"
+		PDB_NAME NukedSC55_clap)
 
     #add_compile_options(
     #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
