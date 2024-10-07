@@ -23,10 +23,20 @@ TODO
 
 ### Prerequisites
 
-- clang 16.0.0+
+#### All platforms
+
 - CMake 3.29+
-- ninja 1.12.1+
 - vcpkg (latest)
+
+#### Windows
+
+- Visual Studio 2022 17.11.4+
+
+
+#### macOS & Linux
+
+- clang 16.0.0+
+- ninja 1.12.1+
 
 
 ### Installing vcpkg
@@ -45,21 +55,49 @@ On Windows, run `bootstrap-vcpkg.bat` instead and set the `PATH` Windows
 enviroment variable accordingly.
 
 
-### Build instructions
+### Building the project
 
-Configure the project:
+#### Windows
 
-    cmake --preset=default
+First you need to configure the project:
+
+    cmake -G "Visual Studio 17 2022" --preset=default
 
 
-Build the project (output will be in the `build/` subdirectory):
+To build the debug artifacts (output will be in the `build/Debug` subdirectory):
+
+    cmake --build build --config Debug
+
+Or just:
 
     cmake --build build
 
 
+To build the release artifacts (output will be in the `build/Release` subdirectory):
+
+    cmake --build build --config Release
+
+
+#### macOS & Linux
+
+First you need to configure the project:
+
+    cmake --preset=default
+
+
+To build the project (output will be in the `build/` subdirectory):
+
+    cmake --build build
+
+
+### Clean the project directory
+
 To clean the `build` directory:
 
     cmake --build build --target clean
+
+To start from scratch, delete the `build` directory and run the configure
+command again.
 
 
 ## License
