@@ -10,13 +10,14 @@
 
 //----------------------------------------------------------------------------
 // Simple debug logging
-#ifdef DEBUG
+// #ifdef DEBUG
 
 static FILE* logfile = nullptr;
 
 static void log_init()
 {
     logfile = fopen("/Users/jnovak/nuked-sc55-clap.log", "wb");
+    //    logfile = fopen("D:\nuked-sc55-clap.log", "wb");
 }
 
 static void _log(const char* fmt, ...)
@@ -36,7 +37,7 @@ static void log_shutdown()
     fclose(logfile);
 }
 
-    #define log(...) _log(__VA_ARGS__)
+#define log(...) _log(__VA_ARGS__)
 #else
 
 static void log_init() {}
@@ -53,7 +54,9 @@ NukedSc55::NukedSc55(const clap_plugin_t _plugin_class,
                      const clap_host_t* _host, const Model _model)
 {
     log_init();
-    log("Plugin path: %s", plugin_path);
+
+    path = plugin_path;
+    log("Plugin path: %s", path.c_str());
 
     plugin_class = _plugin_class;
 
@@ -66,6 +69,29 @@ NukedSc55::NukedSc55(const clap_plugin_t _plugin_class,
 const clap_plugin_t* NukedSc55::GetPluginClass()
 {
     return &plugin_class;
+}
+
+std::filesystem::path NukedSc55::GetRomBasePath()
+{
+    const char* rom_dir = "ROMs";
+
+#ifdef __APPLE__
+    // Try the Resources folder inside the application bundle first on macOS
+    const auto bundle_rom_path = path / "Resources" / rom_dir;
+
+    if (std::filesystem::exists(bundle_rom_path)) {
+        log("Found ROM directory within application bundle, ROM base path: %s",
+            bundle_rom_path.c_str());
+
+        return bundle_rom_path;
+    }
+#endif
+    const char* resources_dir = "NukedSC55-Resources";
+
+    const auto rom_path = path.parent_path() / resources_dir / rom_dir;
+    log("ROM base path: %s", rom_path.c_str());
+
+    return rom_path;
 }
 
 bool NukedSc55::Init(const clap_plugin* _plugin_instance)
@@ -83,26 +109,23 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
         return false;
     }
 
-    // TODO get path to plugin
-    // https://forums.steinberg.net/t/get-path-to-resources-folder/828223/4
-
-    const std::filesystem::path base_rom_dir = "/Users/jnovak/Library/Preferences/DOSBox/sc55-roms/";
-
-    auto romset  = Romset::MK1;
-    auto rom_dir = base_rom_dir;
+    auto rom_path = GetRomBasePath();
+    auto romset   = Romset::MK1;
 
     switch (model) {
-    case Model::Sc55_v1_20: rom_dir += "sc55-v1.20"; break;
-    case Model::Sc55_v1_21: rom_dir += "sc55-v1.21"; break;
-    case Model::Sc55_v2_00: rom_dir += "sc55-v2.00"; break;
+    case Model::Sc55_v1_20: rom_path /= "SC-55-v1.20"; break;
+    case Model::Sc55_v1_21: rom_path /= "SC-55-v1.21"; break;
+    case Model::Sc55_v2_00: rom_path /= "SC-55-v2.00"; break;
     case Model::Sc55mk2_v1_01:
         romset = Romset::MK2;
-        rom_dir += "sc55-mk2-v1.01";
+        rom_path /= "SC-55mk2-v1.01";
         break;
     default: assert(false);
     }
 
-    if (!emu->LoadRoms(romset, rom_dir)) {
+    log("ROM dir: %s", rom_path.c_str());
+
+    if (!emu->LoadRoms(romset, rom_path)) {
         log("emu->LoadRoms failed");
         emu.reset(nullptr);
         return false;
@@ -130,11 +153,8 @@ static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
     AudioFrame<float> out = {};
     Normalize(in, out);
 
-    emu->PublishSample(out.left, out.right);
+    emu->PublishFrame(out.left, out.right);
 }
-
-// TODO mk1 sample rate 32000 Hz
-// TODO mk2 sample rate 33103 Hz
 
 bool NukedSc55::Activate(const double requested_sample_rate,
                          const uint32_t min_frame_count,
@@ -244,8 +264,6 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         const auto num_frames_to_render = static_cast<int>(
             static_cast<double>(next_event_frame - curr_frame) * resample_ratio);
 
-        log("num_frames_to_render: %d", num_frames_to_render);
-
         // Render samples until the next event
         RenderAudio(num_frames_to_render);
 
@@ -259,7 +277,6 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         ResampleAndPublishFrames(num_frames, out_left, out_right);
 
     } else {
-        log("*** render_buf.size(): %d, num_frames; %d", render_buf.size(), num_frames);
         for (size_t i = 0; i < num_frames; ++i) {
             out_left[i]  = render_buf[0][i];
             out_right[i] = render_buf[1][i];
@@ -308,10 +325,61 @@ void NukedSc55::Flush(const clap_input_events_t* in, const clap_output_events_t*
     }
 }
 
-void NukedSc55::PublishSample(const float left, const float right)
+void NukedSc55::PublishFrame(const float left, const float right)
 {
     render_buf[0].emplace_back(left);
     render_buf[1].emplace_back(right);
+}
+
+constexpr uint8_t NoteOff         = 0x80;
+constexpr uint8_t NoteOn          = 0x90;
+constexpr uint8_t PolyKeyPressure = 0xa0;
+constexpr uint8_t ControlChange   = 0xb0;
+constexpr uint8_t ProgramChange   = 0xc0;
+constexpr uint8_t ChannelPressure = 0xd0;
+constexpr uint8_t PitchBend       = 0xe0;
+
+static const char* status_to_string(const uint8_t status)
+{
+    switch (status) {
+    case NoteOff: return "NoteOff"; break;
+    case NoteOn: return "NoteOn"; break;
+    case PolyKeyPressure: return "PolyKeyPressure"; break;
+    case ControlChange: return "ControlChange"; break;
+    case ProgramChange: return "ProgramChange"; break;
+    case ChannelPressure: return "ChannelPressure"; break;
+    case PitchBend: return "PitchBend"; break;
+    default: return "unknown";
+    }
+}
+
+static void log_midi_message(const clap_event_midi_t* event)
+{
+    const auto status  = event->data[0] & 0xf0;
+    const auto channel = event->data[0] & 0x0f;
+
+    // 3-byte messages
+    switch (status) {
+    case NoteOff:
+    case NoteOn:
+    case PolyKeyPressure:
+    case ControlChange:
+    case PitchBend:
+        log("MIDI event: %02x %02x %02x | Ch %d, %s",
+            event->data[0],
+            event->data[1],
+            event->data[2],
+            channel,
+            status_to_string(status));
+        break;
+
+    default:
+        log("MIDI event: %02x %02x    | Ch %d, %s",
+            event->data[0],
+            event->data[1],
+            channel,
+            status_to_string(status));
+    }
 }
 
 void NukedSc55::ProcessEvent(const clap_event_header_t* event)
@@ -319,44 +387,6 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
     if (event->space_id == CLAP_CORE_EVENT_SPACE_ID) {
 
         switch (event->type) {
-
-            // TODO probably best to get rid of CLAP_EVEN_NOTE_* handling and
-            // only deal with MIDI messages
-            /*
-        case CLAP_EVENT_NOTE_ON:
-        case CLAP_EVENT_NOTE_OFF: {
-            log("CLAP_EVENT_NOTE_*");
-            // "Note On" and "Note Off" MIDI events can be sent either as
-            // CLAP_EVENT_NOTE_* or raw CLAP_EVENT_MIDI messages.
-            //
-            // The same event must not be sent twice; it is forbidden for
-            // hosts to send the same note event encoded as both
-            // CLAP_EVENT_NOTE_* and CLAP_EVENT_MIDI messages.
-            //
-            // The official advice is that hosts should prefer
-            // CLAP_EVENT_NOTE_* messages, so we need to handle both.
-            //
-            const auto note_event = reinterpret_cast<const
-        clap_event_note_t*>(event);
-
-            if (note_event->port_index == -1 || note_event->channel == -1 ||
-                note_event->key == -1) {
-                break;
-            }
-
-            const auto status = static_cast<uint8_t>(
-                (CLAP_EVENT_NOTE_OFF ? 0x80 : 0x90) + note_event->channel);
-
-            const auto data1 = static_cast<uint8_t>(note_event->key);
-            const auto data2 = static_cast<uint8_t>(note_event->velocity *
-        127.0);
-
-            emu->PostMIDI(status);
-            emu->PostMIDI(data1);
-            emu->PostMIDI(data2);
-        } break;
-*/
-
         case CLAP_EVENT_MIDI: {
             const auto midi_event = reinterpret_cast<const clap_event_midi_t*>(event);
 
@@ -365,22 +395,15 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
 
             // 3-byte messages
             switch (const auto status = midi_event->data[0] & 0xf0) {
-            case 0x80: // note off
-            case 0x90: // note on
-            case 0xa0: // poly aftertouch
-            case 0xb0: // control change
-            case 0xe0: // pitch wheel
-                emu->PostMIDI(midi_event->data[2]);
-                log("CLAP_EVENT_MIDI: %02x %02x %02x",
-                    midi_event->data[0],
-                    midi_event->data[1],
-                    midi_event->data[2]);
-                break;
-            default:
-                log("CLAP_EVENT_MIDI: %02x %02x",
-                    midi_event->data[0],
-                    midi_event->data[1]);
+            case NoteOff:
+            case NoteOn:
+            case PolyKeyPressure:
+            case ControlChange:
+            case PitchBend: emu->PostMIDI(midi_event->data[2]); break;
             }
+#ifdef DEBUG
+            log_midi_message(midi_event);
+#endif
         } break;
 
         case CLAP_EVENT_MIDI_SYSEX: {
@@ -389,7 +412,7 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
 
             emu->PostMIDI(std::span{sysex_event->buffer, sysex_event->size});
 
-            log("CLAP_EVENT_MIDI_SYSEX, length: %d", sysex_event->size);
+            log("SysEx message, length: %d", sysex_event->size);
         } break;
         }
     }
@@ -397,13 +420,15 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
 
 void NukedSc55::RenderAudio(const uint32_t num_frames)
 {
-    log("RenderAudio: num_frames: %d", num_frames);
-
     const auto start_size = render_buf[0].size();
+
+    log("RenderAudio: num_frames: %d, start_size: %d", num_frames, start_size);
 
     while (render_buf[0].size() - start_size < num_frames) {
         MCU_Step(emu->GetMCU());
     }
+
+    log("  num_rendered: %d", render_buf[0].size() - start_size);
 }
 
 void NukedSc55::ResampleAndPublishFrames(const uint32_t num_out_frames,
