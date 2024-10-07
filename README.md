@@ -64,7 +64,7 @@ First you need to configure the project:
     cmake -G "Visual Studio 17 2022" --preset=default
 
 
-To build the debug artifacts (output will be in the `build/Debug` subdirectory):
+To build the **debug artifacts** (output will be in the `build/Debug` subdirectory):
 
     cmake --build build --config Debug
 
@@ -73,7 +73,7 @@ Or just:
     cmake --build build
 
 
-To build the release artifacts (output will be in the `build/Release` subdirectory):
+To build the **release artifacts** (output will be in the `build/Release` subdirectory):
 
     cmake --build build --config Release
 
