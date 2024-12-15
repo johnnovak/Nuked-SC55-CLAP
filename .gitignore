@@ -44,3 +44,7 @@ compile_commands.json
 
 # Universal app bundle output (macOS)
 out
+
+# Meson subprojects
+subprojects/packagecache
+subprojects/speexdsp-*
