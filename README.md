@@ -73,7 +73,7 @@ Nuked-SC55-Resources
 On macOS, you can also put the `ROMs` folder in the `Resources` folder inside
 the `Nuked-SC55.clap` application bundle.
 
-Here is the list of required files for each supported model and their SHA256
+Here is the list of required files for each supported model and their SHA1
 hashes. Lookup is performed by filename, so make sure the names match exactly.
 
 ```
