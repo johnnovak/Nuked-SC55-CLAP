@@ -2,19 +2,28 @@
   "version": 4,
   "configurePresets": [
     {
-      "name": "base",
-      "displayName": "Base Configuration",
+      "name": "base-vcpkg",
+      "displayName": "Base Configuration for vcpkg usage",
       "description": "Base build using Ninja generator and vcpkg",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON"
       },
       "hidden": true
     },
     {
+      "name": "base-syslibs",
+      "displayName": "Base Configuration for system libraries usage",
+      "description": "Base build using Ninja generator and system libraries",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "hidden": true
+    },
+    {
       "name": "debug-windows-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "architecture": {
         "value": "x64",
         "strategy": "external"
@@ -29,7 +38,7 @@
       },
     {
       "name": "release-windows-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "architecture": {
         "value": "x64",
         "strategy": "external"
@@ -44,7 +53,7 @@
       },
     {
       "name": "debug-windows-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "architecture": {
         "value": "arm64",
         "strategy": "external"
@@ -59,7 +68,7 @@
     },
     {
       "name": "release-windows-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "architecture": {
         "value": "arm64",
         "strategy": "external"
@@ -74,39 +83,71 @@
     },
     {
       "name": "debug-linux-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "Linux x64 debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
+      "name": "debug-linux-syslibs-x64",
+      "inherits": [ "base-syslibs" ],
+      "description": "Linux x64 debug (using system libraries)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
       "name": "release-linux-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "Linux x64 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
+      "name": "release-linux-syslibs-x64",
+      "inherits": [ "base-syslibs" ],
+      "description": "Linux x64 release (using system libraries)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "debug-linux-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "Linux arm64 debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
+      "name": "debug-linux-syslibs-arm64",
+      "inherits": [ "base-syslibs" ],
+      "description": "Linux arm64 debug (using system libraries)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
       "name": "release-linux-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "Linux arm64 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
+      "name": "release-linux-syslibs-arm64",
+      "inherits": [ "base-syslibs" ],
+      "description": "Linux arm64 release (using system libraries)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "debug-macos-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "macOS ARM64 debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -115,7 +156,7 @@
     },
     {
       "name": "release-macos-arm64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "macOS ARM64 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -124,7 +165,7 @@
     },
     {
       "name": "debug-macos-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "macOS x64 debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -133,7 +174,7 @@
     },
     {
       "name": "release-macos-x64",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "description": "macOS x64 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -142,7 +183,7 @@
     },
     {
       "name": "msvc-sanitizer",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "hidden": true,
       "description": "MSVC debug sanitizer",
       "cacheVariables": {
@@ -154,7 +195,7 @@
     },
     {
       "name": "gcc-sanitizer",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "hidden": true,
       "description": "GCC debug sanitizer",
       "cacheVariables": {
@@ -165,10 +206,35 @@
       }
     },
     {
+      "name": "gcc-sanitizer-syslibs",
+      "inherits": [ "base-syslibs" ],
+      "hidden": true,
+      "description": "GCC debug sanitizer (using system libraries)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0 -fno-inline -fno-omit-frame-pointer -fstack-protector-strong -D_FORTIFY_SOURCE=3 -D_GLIBCXX_ASSERTIONS=1 -D_GLIBCXX_DEBUG=1 -D_GLIBCXX_DEBUG_PEDANTIC=1 -D_GLIBCXX_SANITIZE_VECTOR=1 -D_LIBCPP_DEBUG=1 -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1 -D_LIBCPP_ENABLE_HARDENED_MODE=1 -fsanitize=address,undefined -fsanitize-address-use-after-scope -fno-sanitize-recover=all",
+        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=gold -fsanitize=address,undefined",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
       "name": "clang-sanitizer",
-      "inherits": [ "base" ],
+      "inherits": [ "base-vcpkg" ],
       "hidden": true,
       "description": "Clang debug sanitizer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0 -fno-inline -fno-omit-frame-pointer -fstack-protector-strong -D_LIBCPP_DEBUG=1 -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1 -D_LIBCPP_ENABLE_HARDENED_MODE=1 -fsanitize=address,undefined -fsanitize-address-use-after-scope -fno-sanitize-recover=all",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_LINKER": "lld"
+      }
+    },
+    {
+      "name": "clang-sanitizer-syslibs",
+      "inherits": [ "base-syslibs" ],
+      "hidden": true,
+      "description": "Clang debug sanitizer (using system libraries)",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_FLAGS_DEBUG": "-g -O0 -fno-inline -fno-omit-frame-pointer -fstack-protector-strong -D_LIBCPP_DEBUG=1 -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1 -D_LIBCPP_ENABLE_HARDENED_MODE=1 -fsanitize=address,undefined -fsanitize-address-use-after-scope -fno-sanitize-recover=all",
@@ -200,16 +266,32 @@
       "configurePreset": "debug-linux-x64"
     },
     {
+      "name": "debug-linux-syslibs-x64",
+      "configurePreset": "debug-linux-syslibs-x64"
+    },
+    {
       "name": "release-linux-x64",
       "configurePreset": "release-linux-x64"
+    },
+    {
+      "name": "release-linux-syslibs-x64",
+      "configurePreset": "release-linux-syslibs-x64"
     },
     {
       "name": "debug-linux-arm64",
       "configurePreset": "debug-linux-arm64"
     },
     {
+      "name": "debug-linux-syslibs-arm64",
+      "configurePreset": "debug-linux-syslibs-arm64"
+    },
+    {
       "name": "release-linux-arm64",
       "configurePreset": "release-linux-arm64"
+    },
+    {
+      "name": "release-linux-syslibs-arm64",
+      "configurePreset": "release-linux-syslibs-arm64"
     },
     {
       "name": "debug-macos-arm64",
@@ -236,8 +318,16 @@
       "configurePreset": "gcc-sanitizer"
     },
     {
+      "name": "gcc-sanitizer-syslibs",
+      "configurePreset": "gcc-sanitizer-syslibs"
+    },
+    {
       "name": "clang-sanitizer",
       "configurePreset": "clang-sanitizer"
+    },
+    {
+      "name": "clang-sanitizer-syslibs",
+      "configurePreset": "clang-sanitizer-syslibs"
     }
   ]
 }
