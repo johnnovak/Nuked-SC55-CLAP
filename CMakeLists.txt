@@ -9,7 +9,7 @@ project(Nuked-SC55-CLAP
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules/")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_compile_options(-Wall -Wextra -Wno-unused-parameter)
