@@ -102,6 +102,8 @@ SC-55mk2-v1.01/waverom2.bin      4d91cdeaed048d653dbf846a221003c3a3f08279
 
 The main build method is via CMake and vcpkg. This is what the CI workflow uses.
 
+On Linux you can also build without vcpkg, using [system libraries](#using-system-libs-on-linux-alternative-build-method).
+
 ### Prerequisites
 
 #### All platforms
@@ -215,6 +217,29 @@ The following presets are also available for debugging:
 
 - `gcc-sanitizer`
 - `clang-sanitizer`
+
+#### Using system libs on Linux (alternative build method)
+
+On Linux it is possible to compile using system libraries, without using vcpkg.
+Prerequisites are now different:
+
+- Clang (16.0.0 or later)
+- Ninja (1.12.0 or later)
+- SpeexDSP (1.2.1 or later)
+
+To configure the project, use one of the `syslibs` presets:
+
+```zsh
+cmake --preset debug-linux-syslibs-x64
+cmake --preset release-syslibs-linux-x64
+```
+
+Build the project as normal.
+
+The following presets are also available for debugging:
+
+- `gcc-sanitizer-syslibs`
+- `clang-sanitizer-syslibs`
 
 ### Cleaning the build directory
 
