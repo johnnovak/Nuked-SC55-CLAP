@@ -37,13 +37,13 @@ jobs:
             triplet: arm64-linux
             build_type: release
 
-          - os: macos-14
+          - os: macos-15
             label: macos
             arch: arm64
             triplet: arm64-osx
             build_type: release
 
-          - os: macos-14
+          - os: macos-15
             label: macos
             arch: x64
             triplet: arm64-osx
@@ -70,7 +70,7 @@ jobs:
           vcpkgDirectory: ${{ runner.workspace }}/vcpkg
           vcpkgJsonGlob: '**/vcpkg.json'
 
-      - name: Dump $RUNNER_WORKSPACE before build
+      - name: Dump workspace before build
         shell: bash
         run: find $RUNNER_WORKSPACE
 
@@ -84,12 +84,64 @@ jobs:
           configurePreset: ${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
           buildPreset: ${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
 
-      - name: Dump $RUNNER_WORKSPACE after build
+      - name: Dump workpace after build
         shell: bash
         run: find $RUNNER_WORKSPACE
 
-      - name: Upload release artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: Nuked-SC55-CLAP-${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
           path: build/${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}/Nuked-SC55.clap
+
+  build-macos-package:
+    name:    Create macOS universal package
+    needs:   build
+    runs-on: macos-15
+    steps:
+      - name: Download macOS build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: Nuked-SC55-CLAP-release-macos-*
+
+      - name: Dump workspace
+        shell: bash
+        run: find $RUNNER_WORKSPACE
+
+      - name: Create universal binary
+        run: |
+          set -x
+
+          mkdir -p "out/Nuked-SC55.clap"
+
+          X64_EXE="Nuked-SC55-CLAP-release-macos-x64/Contents/MacOS/Nuked-SC55"
+          ARM64_EXE="Nuked-SC55-CLAP-release-macos-arm64/Contents/MacOS/Nuked-SC55"
+
+          lipo "$X64_EXE" "$ARM64_EXE" -create -output Nuked-SC55-universal
+
+          mv Nuked-SC55-CLAP-release-macos-arm64/Contents out/Nuked-SC55.clap
+          mv -f Nuked-SC55-universal out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55
+
+
+      - name: Verify universal binary
+        run: |
+          ARCHS=$(lipo -archs out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55)
+
+          if [[ "$ARCHS" == "x86_64 arm64" ]]; then
+            echo "Success! Universal binary app bundle is in 'out/Nuked-SC55.clap'"
+          else
+            echo "Oops, something went wrong. Arch of the CLAP plugin is '$ARCHS'"
+            exit 1
+          fi
+
+
+      - name: Dump workspace
+        shell: bash
+        run: find $RUNNER_WORKSPACE
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nuked-SC55-CLAP-release-macos-universal
+          path: out
+
