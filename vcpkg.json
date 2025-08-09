@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "nuked-sc55-clap",
   "description": "Nuked SC-55 CLAP plugin",
-  "version": "0.7.0",
+  "version": "0.8.0",
 
   "dependencies": [
     "speexdsp"
