@@ -47,6 +47,18 @@ set_property(
     PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_BINARY_DIR}/Nuked-SC55.clap
 )
 
+# Get external dependencies
+if (CMAKE_TOOLCHAIN_FILE MATCHES ".*vcpkg\.cmake$")
+    # Building using vcpkg
+    find_package(SpeexDSP REQUIRED)
+    target_link_libraries(Nuked-SC55-CLAP PRIVATE Speex::SpeexDSP)
+else()
+    # Building using system libraries
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SPEEXDSP REQUIRED IMPORTED_TARGET speexdsp)
+    target_link_libraries(Nuked-SC55-CLAP PRIVATE PkgConfig::SPEEXDSP)
+endif()
+
 #----------------------------------------------------------------------------
 # Windows
 #----------------------------------------------------------------------------
@@ -103,8 +115,3 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # strip debug info
     #set(CMAKE_EXE_LINKER_FLAGS "-s")
 endif ()
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SPEEXDSP REQUIRED IMPORTED_TARGET speexdsp)
-
-target_link_libraries(Nuked-SC55-CLAP PRIVATE PkgConfig::SPEEXDSP)
