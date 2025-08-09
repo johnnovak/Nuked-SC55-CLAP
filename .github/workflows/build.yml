@@ -4,7 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    name: ${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
+    name: Build ${{ matrix.label }}-${{ matrix.arch }}
 
     runs-on: ${{ matrix.os }}
 
@@ -17,37 +17,31 @@ jobs:
             label: windows
             arch: x64
             triplet: x64-windows
-            build_type: release
 
           - os: windows-2022
             label: windows
             arch: arm64
             triplet: arm64-windows
-            build_type: release
 
           - os: ubuntu-22.04
             label: linux
             arch: x64
             triplet: x64-linux
-            build_type: release
 
           - os: ubuntu-22.04-arm
             label: linux
             arch: arm64
             triplet: arm64-linux
-            build_type: release
 
           - os: macos-15
             label: macos
             arch: arm64
             triplet: arm64-osx
-            build_type: release
 
           - os: macos-15
             label: macos
             arch: x64
             triplet: arm64-osx
-            build_type: release
 
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
@@ -81,8 +75,8 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
-          configurePreset: ${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
-          buildPreset: ${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
+          configurePreset: release-${{ matrix.label }}-${{ matrix.arch }}
+          buildPreset: release-${{ matrix.label }}-${{ matrix.arch }}
 
       - name: Dump workpace after build
         shell: bash
@@ -91,8 +85,8 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Nuked-SC55-CLAP-${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}
-          path: build/${{ matrix.build_type }}-${{ matrix.label }}-${{ matrix.arch }}/Nuked-SC55.clap
+          name: Nuked-SC55-CLAP-${{ matrix.label }}-${{ matrix.arch }}
+          path: build/release-${{ matrix.label }}-${{ matrix.arch }}/Nuked-SC55.clap
 
   build-macos-package:
     name:    Create macOS universal package
@@ -102,7 +96,7 @@ jobs:
       - name: Download macOS build artifacts
         uses: actions/download-artifact@v5
         with:
-          pattern: Nuked-SC55-CLAP-release-macos-*
+          pattern: Nuked-SC55-CLAP-macos-*
 
       - name: Dump workspace
         shell: bash
@@ -114,12 +108,12 @@ jobs:
 
           mkdir -p "out/Nuked-SC55.clap"
 
-          X64_EXE="Nuked-SC55-CLAP-release-macos-x64/Contents/MacOS/Nuked-SC55"
-          ARM64_EXE="Nuked-SC55-CLAP-release-macos-arm64/Contents/MacOS/Nuked-SC55"
+          X64_EXE="Nuked-SC55-CLAP-macos-x64/Contents/MacOS/Nuked-SC55"
+          ARM64_EXE="Nuked-SC55-CLAP-macos-arm64/Contents/MacOS/Nuked-SC55"
 
           lipo "$X64_EXE" "$ARM64_EXE" -create -output Nuked-SC55-universal
 
-          mv Nuked-SC55-CLAP-release-macos-arm64/Contents out/Nuked-SC55.clap
+          mv Nuked-SC55-CLAP-macos-arm64/Contents out/Nuked-SC55.clap
           mv -f Nuked-SC55-universal out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55
 
 
@@ -142,6 +136,6 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: Nuked-SC55-CLAP-release-macos-universal
+          name: Nuked-SC55-CLAP-macos-universal
           path: out
 
