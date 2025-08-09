@@ -43,6 +43,12 @@ jobs:
             triplet: arm64-osx
             build_type: release
 
+          - os: macos-14
+            label: macos
+            arch: x64
+            triplet: arm64-osx
+            build_type: release
+
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
