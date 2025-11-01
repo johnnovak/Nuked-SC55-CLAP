@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
 project(Nuked-SC55-CLAP
-    VERSION     0.9.0
+    VERSION     0.10.0
     DESCRIPTION "Nuked SC-55 CLAP audio plugin"
     LANGUAGES   C CXX
 )

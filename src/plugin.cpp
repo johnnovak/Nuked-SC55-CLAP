@@ -13,7 +13,7 @@ constexpr auto NumPlugins = 5;
 
 constexpr auto Vendor  = "John Novak";
 constexpr auto Url     = "https://github.com/johnnovak/Nuked-SC55-CLAP";
-constexpr auto Version = "0.9.0";
+constexpr auto Version = "0.10.0";
 
 const char *Features[] = {CLAP_PLUGIN_FEATURE_INSTRUMENT,
                           CLAP_PLUGIN_FEATURE_SYNTHESIZER,
