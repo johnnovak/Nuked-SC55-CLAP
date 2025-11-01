@@ -83,7 +83,7 @@ jobs:
         run: find $RUNNER_WORKSPACE
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Nuked-SC55-CLAP-${{ matrix.label }}-${{ matrix.arch }}
           path: build/release-${{ matrix.label }}-${{ matrix.arch }}/Nuked-SC55.clap
@@ -134,7 +134,7 @@ jobs:
         run: find $RUNNER_WORKSPACE
 
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Nuked-SC55-CLAP-macos-universal
           path: out
