@@ -23,12 +23,12 @@ jobs:
             arch: arm64
             triplet: arm64-windows
 
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             label: linux
             arch: x64
             triplet: x64-linux
 
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-24.04-arm
             label: linux
             arch: arm64
             triplet: arm64-linux
