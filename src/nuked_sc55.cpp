@@ -14,6 +14,7 @@
 #endif
 
 #include "nuked_sc55.h"
+#include "nuked-sc55/backend/diagnostics.h"
 #include "nuked-sc55/common/rom_loader.h"
 
 static std::string get_env_var(const char* var_name);
@@ -165,6 +166,10 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     plugin_instance = _plugin_instance;
 
+    // Disable jcmoyer/Nuked-SC55's diagnostics output (defaults to stderr) - a plugin has no
+    // attached console, and some of these calls are reachable from the audio thread.
+    Diag_SetCallback(nullptr);
+
     emu = std::make_unique<Emulator>();
 
     const EMU_Options opts = {.lcd_backend = nullptr, .nvram_filename = std::filesystem::path{}};
@@ -194,16 +199,16 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
         log("Trying ROM dir: %s", rom_path.string().c_str());
 
-        AllRomsetInfo romset_info = {};
         common::LoadRomsetResult load_result = {};
         common::RomOverrides rom_overrides;
-        common::LoadRomsetError err = common::LoadRomset(romset_info, rom_path, romset, false, rom_overrides, load_result);
+        common::LoadRomsetError err =
+            common::LoadRomset(rom_path, romset, common::RomLoader::Hashing, rom_overrides, load_result);
         if (err != common::LoadRomsetError{}) {
             log("emu->LoadRomset failed. Trying next directory");
             continue;
         }
         RomLocationSet loaded = {};
-        if (!emu->LoadRoms(load_result.romset, romset_info, &loaded)) {
+        if (!emu->LoadRoms(load_result.romset, load_result.romset_info, &loaded)) {
             log("emu->LoadRoms failed");
             emu.reset(nullptr);
             return false;

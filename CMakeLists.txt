@@ -21,7 +21,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 #configure_file(config.h.in config.h)
 
 add_library(Nuked-SC55-CLAP MODULE
+    src/nuked-sc55/backend/diagnostics.cpp
     src/nuked-sc55/backend/emu.cpp
+    src/nuked-sc55/backend/file_hashing.cpp
+    src/nuked-sc55/backend/file_io.cpp
     src/nuked-sc55/backend/lcd.cpp
     src/nuked-sc55/backend/mcu.cpp
     src/nuked-sc55/backend/mcu_interrupt.cpp
@@ -30,6 +33,7 @@ add_library(Nuked-SC55-CLAP MODULE
     src/nuked-sc55/backend/pcm.cpp
     src/nuked-sc55/backend/rom.cpp
     src/nuked-sc55/backend/rom_io.cpp
+    src/nuked-sc55/backend/standard_romsets.cpp
     src/nuked-sc55/backend/submcu.cpp
 
     src/nuked-sc55/backend/sha/sha224-256.c
