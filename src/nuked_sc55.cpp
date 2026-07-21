@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -110,6 +112,18 @@ constexpr uint32_t RingNearFullBytes  = 7680;
 // 31250 baud, 10 bits per byte (8 data + start + stop) => 320 us per byte.
 constexpr double MidiWireBitsPerByte = 10.0;
 constexpr double MidiWireBaud        = 31250.0;
+
+//----------------------------------------------------------------------------
+// D4: minimal no-op LCD backend. We never call StartLCD() or LCD_Render(), so
+// none of these methods are ever invoked. The instance exists solely so
+// lcd.cpp stops short-circuiting LCD_Write() and keeps the firmware's
+// character RAM (lcd.LCD_Data) current, letting us watch for "Buff. Full!".
+class NullLcdBackend : public LCD_Backend {
+public:
+    bool Start(const lcd_t&) override { return true; }
+    void Stop() override {}
+    void Render() override {}
+};
 
 //----------------------------------------------------------------------------
 
@@ -222,7 +236,13 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     emu = std::make_unique<Emulator>();
 
-    const EMU_Options opts = {.lcd_backend = nullptr, .nvram_filename = std::filesystem::path{}};
+    // D4: pass a no-op LCD backend so lcd.cpp maintains the character RAM we
+    // scan for the firmware's "Buff. Full!" warning. StartLCD() is never
+    // called, so no rendering happens.
+    lcd_watcher = std::make_unique<NullLcdBackend>();
+
+    const EMU_Options opts = {.lcd_backend   = lcd_watcher.get(),
+                              .nvram_filename = std::filesystem::path{}};
     if (!emu->Init(opts)) {
         log("emu->Init failed");
         emu.reset(nullptr);
@@ -312,6 +332,7 @@ bool NukedSc55::Activate(const double requested_sample_rate,
     frames_rendered_total  = 0;
     ring_above_highwater   = false;
     ring_above_nearfull    = false;
+    buff_full_seen         = false;
 
     emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
@@ -441,6 +462,8 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         render_buf[0].clear();
         render_buf[1].clear();
     }
+
+    CheckBuffFull();
 
     return CLAP_PROCESS_CONTINUE;
 }
@@ -708,6 +731,91 @@ void NukedSc55::FeedQueuedMidi()
         midi_queue.pop_front();
 
         midi_byte_deadline = std::max(midi_byte_deadline, now) + samples_per_byte;
+    }
+}
+
+// Case-sensitive substring search over a byte buffer.
+static bool buffer_contains(const uint8_t* hay, size_t hay_len, std::string_view needle)
+{
+    if (needle.empty() || needle.size() > hay_len) {
+        return false;
+    }
+    for (size_t i = 0; i + needle.size() <= hay_len; ++i) {
+        if (memcmp(&hay[i], needle.data(), needle.size()) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Case-insensitive (ASCII) substring search over a byte buffer.
+static bool buffer_contains_ci(const uint8_t* hay, size_t hay_len, std::string_view needle)
+{
+    if (needle.empty() || needle.size() > hay_len) {
+        return false;
+    }
+    for (size_t i = 0; i + needle.size() <= hay_len; ++i) {
+        size_t j = 0;
+        for (; j < needle.size(); ++j) {
+            const int a = std::tolower(hay[i + j]);
+            const int b = std::tolower(static_cast<unsigned char>(needle[j]));
+            if (a != b) {
+                break;
+            }
+        }
+        if (j == needle.size()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// D4: watch the firmware's LCD character RAM for the "MIDI Buff. Full!"
+// overflow warning - the only direct signal that the firmware itself discarded
+// received MIDI.
+//
+// The SC-55's dot-matrix panel is driven as a *character* device: the firmware
+// can only write character codes to DD RAM (LCD_Data) and up to 8 custom
+// glyphs to CG RAM - there is no pixel-addressable path. lcd.cpp renders each
+// cell via lcd_font[ch - 16] for ch >= 16 (the standard ASCII font; 0x20 is
+// blank, 0x42 is 'B') or CG RAM for ch < 16. The warning is 16 chars of plain
+// text that cannot fit CG RAM's 8 glyphs, so it must use the font path and
+// therefore lands in LCD_Data verbatim as ASCII. DD RAM maps linearly to
+// LCD_Data, so the text is always a contiguous substring.
+//
+// We scan the whole 80-byte buffer (not just the top text line) and fire on
+// either the exact warning text or a looser case-insensitive match (contains
+// "buff" and " full"), so formatting differences across firmware revisions or
+// models still trip it. A false match is a harmless extra log line; a miss
+// would defeat the diagnostic. std::size() keeps the scan covering the full
+// buffer even if the member's type is ever changed (a decayed pointer would
+// not compile).
+//
+// LCD_Data is written only from MCU_Step(), i.e. earlier in this same
+// Process() call on the audio thread, so this read needs no lock.
+//
+// Edge-triggered (log on the absent -> present transition) and additionally
+// rate-limited, so a firmware repaint that briefly clears then rewrites the
+// line cannot flood the log.
+void NukedSc55::CheckBuffFull()
+{
+    const auto& lcd_data = emu->GetLCD().LCD_Data;
+    const size_t n       = std::size(lcd_data);
+
+    const bool exact = buffer_contains(lcd_data, n, "MIDI Buff. Full!");
+    const bool loose = buffer_contains_ci(lcd_data, n, "buff") &&
+                       buffer_contains_ci(lcd_data, n, " full");
+    const bool found = exact || loose;
+
+    if (found && !buff_full_seen) {
+        buff_full_seen = true;
+        static uint64_t d4_count = 0;
+        if (rate_limited(d4_count)) {
+            diag_logf("D4: firmware LCD shows overflow warning [%s] - firmware discarded MIDI data",
+                      exact ? "exact" : "loose");
+        }
+    } else if (!found) {
+        buff_full_seen = false;
     }
 }
 

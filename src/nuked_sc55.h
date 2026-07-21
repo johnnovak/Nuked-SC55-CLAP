@@ -47,6 +47,13 @@ private:
     const clap_host_t* host            = nullptr;
     const clap_plugin* plugin_instance = nullptr;
 
+    // Minimal no-op LCD backend (D4). Declared before `emu` so it outlives the
+    // emulator, which holds a raw pointer to it. Its presence is what makes
+    // lcd.cpp maintain the character RAM we scan for the "Buff. Full!" warning;
+    // no rendering ever runs (StartLCD() is never called).
+    std::unique_ptr<LCD_Backend> lcd_watcher = nullptr;
+    bool buff_full_seen                      = false;
+
     std::unique_ptr<Emulator> emu = nullptr;
 
     double render_sample_rate_hz = 0.0;
@@ -83,6 +90,8 @@ private:
     void FeedQueuedMidi();
     uint32_t RingUnreadBytes();
     void UpdateRingWatermarks(const uint32_t unread);
+
+    void CheckBuffFull();
 
     void RenderAudio(const uint32_t num_frames);
 
