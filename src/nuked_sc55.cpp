@@ -1,5 +1,7 @@
 #include <cassert>
 #include <cmath>
+#include <cstdarg>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <ranges>
@@ -62,8 +64,35 @@ static void log_shutdown() {}
 #endif
 
 //----------------------------------------------------------------------------
+// Release-build diagnostics
+//
+// Unlike the DEBUG-only `log()` above, these are active in release builds so
+// that a MIDI data-loss event leaves a trail instead of being silent. Written
+// to stderr with a fixed prefix. Repetitive events are rate-limited with a
+// plain static counter: the 1st occurrence is logged, then every 100th.
 
-// Get the environment variable value from the provided name, 
+static void diag_logf(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "Nuked-SC55-CLAP: ");
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+    va_end(args);
+}
+
+// Returns true if this occurrence should be logged (1st, then every 100th).
+static bool rate_limited(uint64_t& counter)
+{
+    const bool emit = (counter % 100) == 0;
+    ++counter;
+    return emit;
+}
+
+//----------------------------------------------------------------------------
+
+// Get the environment variable value from the provided name,
 // if the variable exists. Returns an empty string if the 
 // variable does not exist, or is empty
 static std::string get_env_var(const char* var_name)
@@ -431,6 +460,48 @@ constexpr uint8_t ProgramChange   = 0xc0;
 constexpr uint8_t ChannelPressure = 0xd0;
 constexpr uint8_t PitchBend       = 0xe0;
 
+// Total length in bytes (status byte included) of the MIDI message introduced
+// by `status`, or 0 if the byte carries nothing we should forward to the
+// device: the undefined System Common statuses (0xF4/0xF5), the SysEx
+// delimiters (0xF0/0xF7, which reach us via CLAP_EVENT_MIDI_SYSEX), or a data
+// byte the host wrongly placed in the status slot (< 0x80).
+static int MidiMessageLength(const uint8_t status)
+{
+    if (status < 0x80) {
+        return 0; // data byte in the status slot (host bug)
+    }
+    if (status < 0xf0) {
+        // Channel voice message
+        switch (status & 0xf0) {
+        case ProgramChange:   // 0xCn
+        case ChannelPressure: // 0xDn
+            return 2;
+        default: // NoteOff / NoteOn / PolyKeyPressure / ControlChange / PitchBend
+            return 3;
+        }
+    }
+    // System Common / System Real Time
+    switch (status) {
+    case 0xf2: // Song Position Pointer
+        return 3;
+    case 0xf1: // MTC Quarter Frame
+    case 0xf3: // Song Select
+        return 2;
+    case 0xf6: // Tune Request
+    case 0xf8: // Timing Clock
+    case 0xf9: // (undefined real time)
+    case 0xfa: // Start
+    case 0xfb: // Continue
+    case 0xfc: // Stop
+    case 0xfd: // (undefined real time)
+    case 0xfe: // Active Sensing
+    case 0xff: // System Reset
+        return 1;
+    default: // 0xf0, 0xf4, 0xf5, 0xf7
+        return 0;
+    }
+}
+
 [[maybe_unused]] static const char* status_to_string(const uint8_t status)
 {
     switch (status) {
@@ -481,18 +552,26 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
         case CLAP_EVENT_MIDI: {
             const auto midi_event = reinterpret_cast<const clap_event_midi_t*>(event);
 
-            emu->PostMIDI(midi_event->data[0]);
-            emu->PostMIDI(midi_event->data[1]);
+            const uint8_t status = midi_event->data[0];
+            const int len        = MidiMessageLength(status);
 
-            // 3-byte messages
-            const auto status = midi_event->data[0] & 0xf0;
+            // Post exactly the bytes this status carries. This avoids appending
+            // a junk data byte to 1-byte System Real Time messages (which the
+            // firmware's running status could otherwise complete into a phantom
+            // Program/Bank/Pitch-Bend message) and avoids truncating 0xF2.
+            for (int i = 0; i < len; ++i) {
+                emu->PostMIDI(midi_event->data[i]);
+            }
 
-            switch (status) {
-            case NoteOff:
-            case NoteOn:
-            case PolyKeyPressure:
-            case ControlChange:
-            case PitchBend: emu->PostMIDI(midi_event->data[2]); break;
+            if (len == 0 && status < 0x80) {
+                // D5: a data byte in the status slot means the host mis-framed
+                // the stream. Legitimately zero-length statuses (SysEx
+                // delimiters, undefined System Common) are ignored silently.
+                static uint64_t d5_count = 0;
+                if (rate_limited(d5_count)) {
+                    diag_logf("D5: data byte 0x%02x in status slot ignored (host framing bug)",
+                              status);
+                }
             }
 #ifdef DEBUG
             log_midi_message(midi_event);
