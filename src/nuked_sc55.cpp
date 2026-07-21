@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdarg>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -89,6 +91,25 @@ static bool rate_limited(uint64_t& counter)
     ++counter;
     return emit;
 }
+
+//----------------------------------------------------------------------------
+// Fix 2 intake-queue / ring parameters.
+
+// The cap must exceed the largest legal single message. DOSBox permits SysEx
+// up to 20 KB, so a 16 KB cap would make a legal 20 KB SysEx permanently
+// un-admittable under message-atomic admission. 32 KB is ~10 s of wire-rate
+// MIDI, reachable only by a pathological flood.
+constexpr size_t MidiQueueCapBytes = 32 * 1024;
+
+// The firmware RX ring is uart_buffer_size (8192) bytes. Stop feeding while it
+// still holds this many unread bytes, so the unguarded MCU_PostUART() write
+// pointer can never lap the read pointer from our side.
+constexpr uint32_t RingHighWaterBytes = 4096;
+constexpr uint32_t RingNearFullBytes  = 7680;
+
+// 31250 baud, 10 bits per byte (8 data + start + stop) => 320 us per byte.
+constexpr double MidiWireBitsPerByte = 10.0;
+constexpr double MidiWireBaud        = 31250.0;
 
 //----------------------------------------------------------------------------
 
@@ -282,6 +303,16 @@ bool NukedSc55::Activate(const double requested_sample_rate,
 
     emu->Reset();
     emu->GetPCM().enable_oversampling = false;
+
+    // Clear the intake queue and pacing/watchdog state so a host cycling the
+    // plugin never replays stale bytes. (The GS reset below is posted directly
+    // to the ring during bootup, not through the paced queue.)
+    midi_queue.clear();
+    midi_byte_deadline     = 0.0;
+    frames_rendered_total  = 0;
+    ring_above_highwater   = false;
+    ring_above_nearfull    = false;
+
     emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
     // Speed up the devices' bootup delay
@@ -294,6 +325,10 @@ bool NukedSc55::Activate(const double requested_sample_rate,
     emu->SetSampleCallback(receive_sample, this);
 
     render_sample_rate_hz = PCM_GetOutputFrequency(emu->GetPCM());
+
+    // Wire pacing clock uses rendered frames, not MCU cycles: one wire byte
+    // every 320 us equals this many render frames (10.24 @ 32 kHz).
+    samples_per_byte = render_sample_rate_hz * (MidiWireBitsPerByte / MidiWireBaud);
 
     log("render_sample_rate_hz: %g", render_sample_rate_hz);
 
@@ -448,6 +483,7 @@ void NukedSc55::Flush(const clap_input_events_t* in, const clap_output_events_t*
 
 void NukedSc55::PublishFrame(const float left, const float right)
 {
+    ++frames_rendered_total;
     render_buf[0].emplace_back(left);
     render_buf[1].emplace_back(right);
 }
@@ -555,15 +591,13 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
             const uint8_t status = midi_event->data[0];
             const int len        = MidiMessageLength(status);
 
-            // Post exactly the bytes this status carries. This avoids appending
-            // a junk data byte to 1-byte System Real Time messages (which the
-            // firmware's running status could otherwise complete into a phantom
-            // Program/Bank/Pitch-Bend message) and avoids truncating 0xF2.
-            for (int i = 0; i < len; ++i) {
-                emu->PostMIDI(midi_event->data[i]);
-            }
-
-            if (len == 0 && status < 0x80) {
+            // Enqueue exactly the bytes this status carries; the paced feed in
+            // RenderAudio() drains the queue into the device at wire rate.
+            // Framing exactness (see MidiMessageLength) avoids appending a junk
+            // data byte to 1-byte System Real Time messages or truncating 0xF2.
+            if (len > 0) {
+                EnqueueMidiMessage(midi_event->data, static_cast<size_t>(len), status);
+            } else if (status < 0x80) {
                 // D5: a data byte in the status slot means the host mis-framed
                 // the stream. Legitimately zero-length statuses (SysEx
                 // delimiters, undefined System Common) are ignored silently.
@@ -582,11 +616,98 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
             const auto sysex_event = reinterpret_cast<const clap_event_midi_sysex*>(
                 event);
 
-            emu->PostMIDI(std::span{sysex_event->buffer, sysex_event->size});
+            // Enqueue the whole SysEx so ordering with channel messages is
+            // preserved; message-atomic admission drops it wholesale if it
+            // cannot fit the cap (D1).
+            EnqueueMidiMessage(sysex_event->buffer, sysex_event->size, 0xf0);
 
             log("SysEx message, length: %d", sysex_event->size);
         } break;
         }
+    }
+}
+
+// Message-atomic admission into the intake queue: enqueue the whole message or
+// drop the whole message. Individual bytes are never dropped, which would
+// desync the byte stream - the very failure Fix 2 exists to prevent.
+bool NukedSc55::EnqueueMidiMessage(const uint8_t* bytes, const size_t len,
+                                   const uint8_t status)
+{
+    if (midi_queue.size() + len > MidiQueueCapBytes) {
+        // D1: intake queue overflow.
+        static uint64_t d1_count = 0;
+        if (rate_limited(d1_count)) {
+            diag_logf("D1: intake queue full (cap=%zu), dropped message status=0x%02x len=%zu depth=%zu",
+                      MidiQueueCapBytes, status, len, midi_queue.size());
+        }
+        return false;
+    }
+    midi_queue.insert(midi_queue.end(), bytes, bytes + len);
+    return true;
+}
+
+// Unread bytes in the firmware's UART RX ring. uart_buffer_size is a power of
+// two, so the unsigned wrap of (write - read) gives the correct occupancy.
+uint32_t NukedSc55::RingUnreadBytes()
+{
+    const auto& mcu = emu->GetMCU();
+    return (mcu.uart_write_ptr - mcu.uart_read_ptr) % uart_buffer_size;
+}
+
+void NukedSc55::UpdateRingWatermarks(const uint32_t unread)
+{
+    if (unread >= RingHighWaterBytes) {
+        if (!ring_above_highwater) {
+            ring_above_highwater = true;
+            // D2: ring high-water. Pacing is active yet the ring is half full,
+            // so something upstream is flooding.
+            static uint64_t d2_count = 0;
+            if (rate_limited(d2_count)) {
+                diag_logf("D2: UART RX ring high-water crossed: %u/%u unread bytes",
+                          unread, uart_buffer_size);
+            }
+        }
+    } else {
+        ring_above_highwater = false;
+    }
+
+    if (unread >= RingNearFullBytes) {
+        if (!ring_above_nearfull) {
+            ring_above_nearfull = true;
+            // D3: ring near-full. Unreachable given the headroom guard below
+            // unless Fix 2 is bypassed - which is exactly what it would prove.
+            static uint64_t d3_count = 0;
+            if (rate_limited(d3_count)) {
+                diag_logf("D3: UART RX ring near-full: %u/%u unread bytes (imminent wrap)",
+                          unread, uart_buffer_size);
+            }
+        }
+    } else {
+        ring_above_nearfull = false;
+    }
+}
+
+// Feed queued bytes into the device at wire rate, at most one byte per
+// samples_per_byte render frames. max(deadline, now) grants no burst credit
+// after an idle gap; the ring headroom guard keeps the unguarded ring safe.
+void NukedSc55::FeedQueuedMidi()
+{
+    const double now = static_cast<double>(frames_rendered_total);
+
+    while (!midi_queue.empty() && now >= midi_byte_deadline) {
+        const uint32_t unread = RingUnreadBytes();
+        UpdateRingWatermarks(unread);
+
+        if (unread >= RingHighWaterBytes) {
+            // Ring busy; retry on a later step without advancing the deadline
+            // (relevant for the mk2, whose sub-MCU drains slower than we feed).
+            break;
+        }
+
+        emu->PostMIDI(midi_queue.front());
+        midi_queue.pop_front();
+
+        midi_byte_deadline = std::max(midi_byte_deadline, now) + samples_per_byte;
     }
 }
 
@@ -597,8 +718,10 @@ void NukedSc55::RenderAudio(const uint32_t num_frames)
     log("RenderAudio: num_frames: %d, start_size: %d", num_frames, start_size);
 
     while (render_buf[0].size() - start_size < num_frames) {
+        FeedQueuedMidi();
         MCU_Step(emu->GetMCU());
     }
+    FeedQueuedMidi();
 
     log("  num_rendered: %d", render_buf[0].size() - start_size);
 }

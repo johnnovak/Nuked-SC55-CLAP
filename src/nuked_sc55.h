@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
+#include <deque>
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -56,11 +58,31 @@ private:
     bool do_resample               = false;
     double resample_ratio          = 0.0f;
 
+    // Wire-rate MIDI intake queue (Fix 2). CLAP events are enqueued here and
+    // fed into the emulator's UART ring at the 31250-baud wire rate (one byte
+    // per ~320 us of emulated time), so byte-stream consumers never receive a
+    // burst a real cable could not have delivered.
+    std::deque<uint8_t> midi_queue = {};
+    double samples_per_byte        = 0.0; // render frames per wire byte
+    double midi_byte_deadline      = 0.0; // next feed time, in render frames
+    uint64_t frames_rendered_total = 0;   // monotonic render-frame clock
+
+    // UART RX ring headroom watchdog (D2/D3), edge-triggered so we log the
+    // crossing rather than every byte above the threshold.
+    bool ring_above_highwater = false;
+    bool ring_above_nearfull  = false;
+
     // Methods
     std::vector<std::filesystem::path> GetRomEnvDirs();
     std::vector<std::filesystem::path> GetRomBasePaths();
 
     void ProcessEvent(const clap_event_header_t* event);
+
+    bool EnqueueMidiMessage(const uint8_t* bytes, const size_t len,
+                            const uint8_t status);
+    void FeedQueuedMidi();
+    uint32_t RingUnreadBytes();
+    void UpdateRingWatermarks(const uint32_t unread);
 
     void RenderAudio(const uint32_t num_frames);
 
