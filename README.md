@@ -91,8 +91,8 @@ the `Nuked-SC55.clap` application bundle.
 
 As an alternative to creating the `Nuked-SC55-Resources` directory in the
 plugin location, you may set the `SOUNDCANVAS_ROM_PATH` environment variable
-to a list of absolute directories of where to look for ROM's. The OS PATH
-separator is used as a list delimiter Eg:
+to a list of absolute directories of where to look for ROMs. The OS PATH
+separator is used as a list delimiter, e.g.:
 
 ```pwsh
 $Env:SOUNDCANVAS_ROM_PATH = "C:\path\to\ROM\dir"
@@ -194,7 +194,7 @@ export PATH=$VCPKG_ROOT:$PATH
 ```
 
 On Windows, run `bootstrap-vcpkg.bat` instead and set the `PATH` Windows
-enviroment variable accordingly:
+environment variable accordingly:
 
 ```pwsh
 $env:VCPKG_ROOT="<vcpkg_repo_location>"
@@ -241,7 +241,7 @@ cmake --preset debug-macos-arm64
 cmake --preset release-macos-arm64
 ```
 
-To cross-compile, (e.g., for x86_64):
+To cross-compile (e.g., for x86_64):
 
 ```zsh
 cmake --preset debug-macos-x64
@@ -296,7 +296,7 @@ To configure the project, use one of the `syslibs` presets:
 
 ```zsh
 cmake --preset debug-linux-syslibs-x64
-cmake --preset release-syslibs-linux-x64
+cmake --preset release-linux-syslibs-x64
 ```
 
 Build the project as normal.

@@ -116,4 +116,3 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # strip debug info
     #set(CMAKE_EXE_LINKER_FLAGS "-s")
 endif ()
-

@@ -13,7 +13,7 @@
 
 # Use tabs, but only for indentation (lining up blocks of code).
 # Use space for indenting continuations (lining up long statements broken
-# into several lines.
+# into several lines).
 #
 UseTab: Never
 TabWidth: 4
@@ -224,7 +224,7 @@ InsertBraces: true
 #            { 7,     5,    "!!"}
 #        };
 #
-# AIAS_None (in configuration: None) Don’t align array initializer columns.
+# AIAS_None (in configuration: None) Don't align array initializer columns.
 #
 AlignArrayOfStructures: Right
 
