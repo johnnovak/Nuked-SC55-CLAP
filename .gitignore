@@ -8,10 +8,11 @@ build
 *.gch
 *.pch
 
-# Visual Studio / Code
+# Visual Studio / Visual Studio Code
 .vs
 .vscode
 *.code-workspace
+*.aps
 
 # IntelliJ
 .idea
@@ -48,3 +49,6 @@ out
 # Meson subprojects
 subprojects/packagecache
 subprojects/speexdsp-*
+
+# CMake-generated files
+resources/windows/*.rc

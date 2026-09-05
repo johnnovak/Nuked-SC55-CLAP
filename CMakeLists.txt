@@ -65,7 +65,7 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
-    target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
+    #target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
@@ -73,6 +73,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #add_compile_options(
     #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
     #)
+
+    # RC (resource compiler) is Windows-only. Generate the resource
+    # script from project metadata and compile it into the plugin.
+    enable_language(RC)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/plugin.rc.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/plugin.rc @ONLY)
+    target_sources(Nuked-SC55-CLAP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/plugin.rc)
 
 #----------------------------------------------------------------------------
 # macOS

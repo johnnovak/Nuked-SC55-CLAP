@@ -1,0 +1,49 @@
+#include <winresrc.h>
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(65001)
+
+#define	NUKED_VERSION @PROJECT_VERSION@
+#define NUKED_MAJOR @PROJECT_VERSION_MAJOR@
+#define NUKED_MINOR @PROJECT_VERSION_MINOR@
+#define	NUKED_PATCH @PROJECT_VERSION_PATCH@
+#define	NUKED_SUFFIX ".0"
+
+#define	NUKED_STRINGIFY_(x) #x
+#define	NUKED_STRINGIFY(x) NUKED_STRINGIFY_(x)
+
+#define	NUKED_VERSION_STRING NUKED_STRINGIFY(NUKED_VERSION) NUKED_SUFFIX
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION NUKED_MAJOR, NUKED_MINOR, NUKED_PATCH, 0
+PRODUCTVERSION NUKED_MAJOR, NUKED_MINOR, NUKED_PATCH, 0
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+FILEFLAGS VS_FF_DEBUG
+#else
+FILEFLAGS 0x0L
+#endif
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "nukedykt"
+            VALUE "FileDescription", "Roland SC-55 emulator by nukeykt as a CLever Audio Plug-in (CLAP)"
+            VALUE "FileVersion", NUKED_VERSION_STRING
+            VALUE "InternalName", "Nuked SC-55"
+            VALUE "LegalCopyright", "© 2021-2026 nukedykt, johnnovak"
+            VALUE "OriginalFilename", "Nuked-SC55.clap"
+            VALUE "ProductName", "Nuked Roland SC-55 CLAP"
+            VALUE "ProductVersion", NUKED_VERSION_STRING
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
