@@ -66,13 +66,24 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
     target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
+
+    # /W4 -- Enable level 4 warnings
+    # /WX -- Treat warnings as errors
+    # /Zc:preprocessor -- Conforming preprocessor
+    # /Zc:__cplusplus -- Report the real `__cplusplus` value
+    # /utf-8 -- UTF-8 source and execution charset
+    target_compile_options(Nuked-SC55-CLAP PRIVATE /W4 /WX /Zc:preprocessor /Zc:__cplusplus /utf-8)
+
+    # Silence unreferenced parameter/local warnings in the Nuked-SC55 sources.
+    file(GLOB_RECURSE NUKED_SC55_SRCS CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/nuked-sc55/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/nuked-sc55/*.cpp")
+    set_source_files_properties(${NUKED_SC55_SRCS} PROPERTIES COMPILE_OPTIONS "/wd4100;/wd4101")
+
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
 
-    #add_compile_options(
-    #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
-    #)
 
 #----------------------------------------------------------------------------
 # macOS

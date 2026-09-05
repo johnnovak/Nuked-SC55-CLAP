@@ -97,11 +97,11 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55mk2_v1_01 = {
 //////////////////////////////////////////////////////////////////////////////
 
 static const clap_plugin_note_ports_t extension_note_ports = {
-    .count = [](const clap_plugin_t* plugin, bool is_input) -> uint32_t {
+    .count = [](const clap_plugin_t*, bool is_input) -> uint32_t {
         return is_input ? 1 : 0;
     },
 
-    .get = [](const clap_plugin_t* plugin, uint32_t index, bool is_input,
+    .get = [](const clap_plugin_t*, uint32_t index, bool is_input,
               clap_note_port_info_t* info) -> bool {
         if (!is_input || index) {
             return false;
@@ -120,11 +120,11 @@ static const clap_plugin_note_ports_t extension_note_ports = {
     }};
 
 static const clap_plugin_audio_ports_t extension_audio_ports = {
-    .count = [](const clap_plugin_t* plugin, bool is_input) -> uint32_t {
+    .count = [](const clap_plugin_t*, bool is_input) -> uint32_t {
         return is_input ? 0 : 1;
     },
 
-    .get = [](const clap_plugin_t* plugin, uint32_t index, bool is_input,
+    .get = [](const clap_plugin_t*, uint32_t index, bool is_input,
               clap_audio_port_info_t* info) -> bool {
         if (is_input || index) {
             return false;
@@ -156,7 +156,7 @@ static const clap_plugin_state_t extension_state = {
 // Plugin classes
 //////////////////////////////////////////////////////////////////////////////
 
-static const void* get_extension(const clap_plugin* plugin, const char* id)
+static const void* get_extension(const clap_plugin*, const char* id)
 {
     if (strcmp(id, CLAP_EXT_NOTE_PORTS) == 0) {
         return &extension_note_ports;
@@ -198,13 +198,13 @@ static const clap_plugin_t my_plugin_class_sc55_v1_00 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -216,7 +216,7 @@ static const clap_plugin_t my_plugin_class_sc55_v1_00 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 v1.10
@@ -244,13 +244,13 @@ static const clap_plugin_t my_plugin_class_sc55_v1_10 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -262,7 +262,7 @@ static const clap_plugin_t my_plugin_class_sc55_v1_10 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 v1.20
@@ -290,13 +290,13 @@ static const clap_plugin_t my_plugin_class_sc55_v1_20 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -308,7 +308,7 @@ static const clap_plugin_t my_plugin_class_sc55_v1_20 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 v1.21
@@ -336,13 +336,13 @@ static const clap_plugin_t my_plugin_class_sc55_v1_21 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -354,7 +354,7 @@ static const clap_plugin_t my_plugin_class_sc55_v1_21 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 v2.00
@@ -382,13 +382,13 @@ static const clap_plugin_t my_plugin_class_sc55_v2_00 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -400,7 +400,7 @@ static const clap_plugin_t my_plugin_class_sc55_v2_00 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 mk2 v1.01
@@ -428,13 +428,13 @@ static const clap_plugin_t my_plugin_class_sc55mk2_v1_01 = {
         return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
     },
 
-    .deactivate = [](const clap_plugin* plugin) {},
+    .deactivate = [](const clap_plugin*) {},
 
-    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+    .start_processing = [](const clap_plugin*) -> bool { return true; },
 
-    .stop_processing = [](const clap_plugin* plugin) {},
+    .stop_processing = [](const clap_plugin*) {},
 
-    .reset = [](const clap_plugin* plugin) {},
+    .reset = [](const clap_plugin*) {},
 
     .process = [](const clap_plugin* plugin,
                   const clap_process_t* process) -> clap_process_status {
@@ -446,7 +446,7 @@ static const clap_plugin_t my_plugin_class_sc55mk2_v1_01 = {
         return get_extension(plugin, id);
     },
 
-    .on_main_thread = [](const clap_plugin* plugin) {}};
+    .on_main_thread = [](const clap_plugin*) {}};
 
 //////////////////////////////////////////////////////////////////////////////
 // Plugin factory
@@ -454,11 +454,11 @@ static const clap_plugin_t my_plugin_class_sc55mk2_v1_01 = {
 
 static const clap_plugin_factory_t plugin_factory = {
 
-    .get_plugin_count = [](const clap_plugin_factory* factory) -> uint32_t {
+    .get_plugin_count = [](const clap_plugin_factory*) -> uint32_t {
         return NumPlugins;
     },
 
-    .get_plugin_descriptor = [](const clap_plugin_factory* factory,
+    .get_plugin_descriptor = [](const clap_plugin_factory*,
                                 uint32_t index) -> const clap_plugin_descriptor_t* {
         if (index == 0) {
             return &plugin_descriptor_sc55_v1_00;
@@ -483,7 +483,7 @@ static const clap_plugin_factory_t plugin_factory = {
         }
     },
 
-    .create_plugin = [](const clap_plugin_factory* factory, const clap_host_t* host,
+    .create_plugin = [](const clap_plugin_factory*, const clap_host_t* host,
                         const char* plugin_id) -> const clap_plugin_t* {
         if (!clap_version_is_compatible(host->clap_version)) {
             return nullptr;
