@@ -47,14 +47,14 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: true
 
       - name: Install CMake
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: ~3.31.0
+          cmakeVersion: ~4.4.0
           ninjaVersion: latest
 
       - name: Set up vcpkg
@@ -83,7 +83,7 @@ jobs:
         run: find $RUNNER_WORKSPACE
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: Nuked-SC55-CLAP-${{ matrix.label }}-${{ matrix.arch }}
           path: build/release-${{ matrix.label }}-${{ matrix.arch }}/Nuked-SC55.clap
@@ -94,7 +94,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Download macOS build artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           pattern: Nuked-SC55-CLAP-macos-*
 
@@ -134,7 +134,7 @@ jobs:
         run: find $RUNNER_WORKSPACE
 
       - name: Upload package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: Nuked-SC55-CLAP-macos-universal
           path: out
