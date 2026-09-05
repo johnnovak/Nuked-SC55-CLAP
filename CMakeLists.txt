@@ -66,6 +66,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
     target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
+
+    # ARM64EC: specify the ARM64EC target platform for the compiler and linker.
+    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64EC")
+        target_compile_options(Nuked-SC55-CLAP PRIVATE /arm64EC)
+        target_link_options(Nuked-SC55-CLAP PRIVATE /MACHINE:ARM64EC)
+    endif ()
+
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)

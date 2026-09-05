@@ -13,15 +13,20 @@ jobs:
 
       matrix:
         include:
-          - os: windows-2022
+          - os: windows-2025
             label: windows
             arch: x64
             triplet: x64-windows
 
-          - os: windows-2022
+          - os: windows-2025
             label: windows
             arch: arm64
             triplet: arm64-windows
+
+          - os: windows-2025
+            label: windows
+            arch: arm64ec
+            triplet: arm64ec-windows
 
           - os: ubuntu-24.04
             label: linux

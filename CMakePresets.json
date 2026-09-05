@@ -7,6 +7,9 @@
       "description": "Base build using Ninja generator and vcpkg",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
+      "environment": {
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/triplets"
+      },
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_FIND_PACKAGE_PREFER_CONFIG" : "ON"
@@ -78,6 +81,36 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_SYSTEM_PROCESSOR": "ARM64",
         "VCPKG_TARGET_TRIPLET": "arm64-windows-static-md",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "debug-windows-arm64ec",
+      "inherits": [ "base-vcpkg" ],
+      "architecture": {
+        "value": "arm64ec",
+        "strategy": "external"
+      },
+      "description": "Windows ARM64EC debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_SYSTEM_PROCESSOR": "ARM64EC",
+        "VCPKG_TARGET_TRIPLET": "arm64ec-windows-static-md",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "release-windows-arm64ec",
+      "inherits": [ "base-vcpkg" ],
+      "architecture": {
+        "value": "arm64ec",
+        "strategy": "external"
+      },
+      "description": "Windows ARM64EC release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_SYSTEM_PROCESSOR": "ARM64EC",
+        "VCPKG_TARGET_TRIPLET": "arm64ec-windows-static-md",
         "VCPKG_HOST_TRIPLET": "x64-windows"
       }
     },
@@ -260,6 +293,14 @@
     {
       "name": "release-windows-arm64",
       "configurePreset": "release-windows-arm64"
+    },
+    {
+      "name": "debug-windows-arm64ec",
+      "configurePreset": "debug-windows-arm64ec"
+    },
+    {
+      "name": "release-windows-arm64ec",
+      "configurePreset": "release-windows-arm64ec"
     },
     {
       "name": "debug-linux-x64",
