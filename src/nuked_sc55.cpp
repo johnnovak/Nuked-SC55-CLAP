@@ -177,34 +177,30 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     auto rom_paths = GetRomBasePaths();
     for (const auto& base_path : rom_paths) {
         auto rom_path = base_path;
-        auto romset = "mk1";
+        const char* romset = "";
 
         switch (model) {
-        case Model::Sc55_v1_00: rom_path /= "SC-55-v1.00"; break;
-        case Model::Sc55_v1_10: rom_path /= "SC-55-v1.10"; break;
-        case Model::Sc55_v1_20: rom_path /= "SC-55-v1.20"; break;
-        case Model::Sc55_v1_21: rom_path /= "SC-55-v1.21"; break;
-        case Model::Sc55_v2_00: rom_path /= "SC-55-v2.00"; break;
-        case Model::Sc55mk2_v1_01:
-            romset = "mk2";
-            rom_path /= "SC-55mk2-v1.01";
-            break;
+        case Model::Sc55_v1_00: romset = "mk1-v1.00"; rom_path /= "SC-55-v1.00"; break;
+        case Model::Sc55_v1_10: romset = "mk1-v1.10"; rom_path /= "SC-55-v1.10"; break;
+        case Model::Sc55_v1_20: romset = "mk1-v1.20"; rom_path /= "SC-55-v1.20"; break;
+        case Model::Sc55_v1_21: romset = "mk1-v1.21"; rom_path /= "SC-55-v1.21"; break;
+        case Model::Sc55_v2_00: romset = "mk1-v2.00"; rom_path /= "SC-55-v2.00"; break;
+        case Model::Sc55mk2_v1_01: romset = "mk2-v1.01"; rom_path /= "SC-55mk2-v1.01"; break;
         default: assert(false);
         }
 
         log("Trying ROM dir: %s", rom_path.string().c_str());
 
-        AllRomsetInfo romset_info = {};
         common::LoadRomsetResult load_result = {};
         common::RomOverrides rom_overrides;
-        common::LoadRomsetError err = common::LoadRomset(romset_info, rom_path, romset, false, rom_overrides, load_result);
+        common::LoadRomsetError err = common::LoadRomset(rom_path, romset, common::RomLoader::Hashing, rom_overrides, load_result);
         if (err != common::LoadRomsetError{}) {
-            log("emu->LoadRomset failed. Trying next directory");
+            log("`common::LoadRomset()` failed. Trying next directory");
             continue;
         }
         RomLocationSet loaded = {};
-        if (!emu->LoadRoms(load_result.romset, romset_info, &loaded)) {
-            log("emu->LoadRoms failed");
+        if (!emu->LoadRoms(load_result.romset, load_result.romset_info, &loaded)) {
+            log("`emu->LoadRoms()` failed");
             emu.reset(nullptr);
             return false;
         }

@@ -107,6 +107,7 @@ enum {
     SHA256_Message_Block_Size = 64, SHA384_Message_Block_Size = 128,
     SHA512_Message_Block_Size = 128,
     USHA_Max_Message_Block_Size = SHA512_Message_Block_Size,
+
     SHA1HashSize = 20, SHA224HashSize = 28, SHA256HashSize = 32,
     SHA384HashSize = 48, SHA512HashSize = 64,
     USHAMaxHashSize = SHA512HashSize,
