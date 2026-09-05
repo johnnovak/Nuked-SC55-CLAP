@@ -66,6 +66,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
     target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
+
+    # /Gw -- Emit each global as its own COMDAT so `/OPT:REF` can drop unused data
+    target_compile_options(Nuked-SC55-CLAP PRIVATE $<$<CONFIG:Release>:/Gw>)
+
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
