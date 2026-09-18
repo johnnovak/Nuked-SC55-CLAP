@@ -1,0 +1,24 @@
+#pragma once
+
+// Generated from "plugin.h.in" by CMake; do not edit.
+
+#define PLUGIN_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PLUGIN_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PLUGIN_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#define PLUGIN_VERSION_STRING "@PROJECT_VERSION@"
+
+#define PLUGIN_VENDOR "@PLUGIN_VENDOR@"
+#define PLUGIN_URL    "@PLUGIN_URL@"
+
+#define PLUGIN_NAME     "@PLUGIN_NAME@"
+#define PLUGIN_FILENAME "@PLUGIN_FILENAME@"
+
+#define PLUGIN_COPYRIGHT "@PLUGIN_COPYRIGHT@"
+
+// The per-model CLAP descriptors.
+#define PLUGIN_DESCRIPTION_PREFIX "Roland SC-55"
+#define PLUGIN_DESCRIPTION_SUFFIX "MIDI sound module emulation"
+
+// Generic product description (no model version).
+#define PLUGIN_DESCRIPTION "Roland Sound Canvas " PLUGIN_DESCRIPTION_SUFFIX

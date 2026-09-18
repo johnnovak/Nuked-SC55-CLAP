@@ -4,14 +4,19 @@ CMakeCache.txt
 Makefile
 build
 
+# CMake-generated metadata header
+plugin.h
+!include/clap/plugin.h
+
 # Precompiled Headers
 *.gch
 *.pch
 
-# Visual Studio / Code
+# Visual Studio / Visual Studio Code
 .vs
 .vscode
 *.code-workspace
+*.aps
 
 # IntelliJ
 .idea

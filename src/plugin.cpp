@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string>
 
+#include "plugin.h"
 #include "nuked_sc55.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -11,9 +12,9 @@
 // Number of plugins in this dynamic library
 constexpr auto NumPlugins = 6;
 
-constexpr auto Vendor  = "John Novak";
-constexpr auto Url     = "https://github.com/johnnovak/Nuked-SC55-CLAP";
-constexpr auto Version = "0.11.0";
+constexpr auto Vendor  = PLUGIN_VENDOR;
+constexpr auto Url     = PLUGIN_URL;
+constexpr auto Version = PLUGIN_VERSION_STRING;
 
 const char *Features[] = {CLAP_PLUGIN_FEATURE_INSTRUMENT,
                           CLAP_PLUGIN_FEATURE_SYNTHESIZER,
@@ -29,7 +30,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_00 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 v1.00 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX " v1.00 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_10 = {
@@ -41,7 +42,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_10 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 v1.10 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX " v1.10 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_20 = {
@@ -53,7 +54,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_20 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 v1.20 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX " v1.20 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_21 = {
@@ -65,7 +66,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_21 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 v1.21 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX " v1.21 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v2_00 = {
@@ -77,7 +78,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55_v2_00 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55 v2.00 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX " v2.00 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55mk2_v1_01 = {
@@ -89,7 +90,7 @@ static const clap_plugin_descriptor_t plugin_descriptor_sc55mk2_v1_01 = {
     .manual_url   = Url,
     .support_url  = Url,
     .version      = Version,
-    .description  = "Roland SC-55mk2 v1.01 MIDI sound module emulation",
+    .description  = PLUGIN_DESCRIPTION_PREFIX "mk2 v1.01 " PLUGIN_DESCRIPTION_SUFFIX,
     .features     = Features};
 
 //////////////////////////////////////////////////////////////////////////////

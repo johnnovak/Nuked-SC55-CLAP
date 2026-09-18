@@ -17,8 +17,18 @@ endif ()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# TODO
-#configure_file(config.h.in config.h)
+# Plugin metadata shared by the CLAP descriptors, the Windows resource script
+# and the macOS bundle.
+set(PLUGIN_VENDOR    "John Novak")
+set(PLUGIN_URL       "https://github.com/johnnovak/Nuked-SC55-CLAP")
+set(PLUGIN_NAME      "Nuked-SC55-CLAP")
+set(PLUGIN_FILENAME  "Nuked-SC55.clap")
+set(PLUGIN_COPYRIGHT "© 2021-2026 John Novak")
+
+# Generate the shared metadata header.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/plugin.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/plugin.h @ONLY)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(Nuked-SC55-CLAP MODULE
     src/nuked-sc55/backend/emu.cpp
@@ -63,10 +73,6 @@ endif()
 # Windows
 #----------------------------------------------------------------------------
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
-
-    target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
-
     # /Gw -- Emit each global data item in its own COMDAT section.
     #        The Nuked-SC55 backend embeds large static tables (notably the LCD
     #        image and font bitmaps) that this GUI-less plug-in never references.
@@ -84,6 +90,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
     #)
 
+    # RC (resource compiler) is Windows-only.
+    enable_language(RC)
+    target_sources(Nuked-SC55-CLAP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/plugin.rc)
+
 #----------------------------------------------------------------------------
 # macOS
 #----------------------------------------------------------------------------
@@ -97,11 +107,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/plugin.plist.in
 
         MACOSX_BUNDLE_GUI_IDENTIFIER        net.johnnovak.nuked_sc55_clap
-        MACOSX_BUNDLE_BUNDLE_NAME           "Nuked-SC55-CLAP"
+        MACOSX_BUNDLE_BUNDLE_NAME           "${PLUGIN_NAME}"
         MACOSX_BUNDLE_BUNDLE_VERSION        "${PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING  "${PROJECT_VERSION}"
         MACOSX_BUNDLE_LONG_VERSION_STRING   "${PROJECT_VERSION}"
-        MACOSX_BUNDLE_COPYRIGHT             "John Novak"
+        MACOSX_BUNDLE_COPYRIGHT             "${PLUGIN_COPYRIGHT}"
     )
 
     file(TOUCH_NOCREATE ${CMAKE_BINARY_DIR}/Nuked-SC55.clap/Contents/PkgInfo)
