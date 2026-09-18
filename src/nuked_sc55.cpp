@@ -30,12 +30,25 @@ static FILE* logfile = nullptr;
 
 static void log_init()
 {
+    if (logfile) {
+        return;
+    }
+
+#ifdef _WIN32
+    if (fopen_s(&logfile, "D:\\nuked-sc55-clap.log", "wb") != 0) {
+        logfile = nullptr;
+    }
+#else
     logfile = fopen("/Users/jnovak/nuked-sc55-clap.log", "wb");
-    //logfile = fopen("D:\\nuked-sc55-clap.log", "wb");
+#endif
 }
 
 static void _log(const char* fmt, ...)
 {
+    if (!logfile) {
+        return;
+    }
+
     va_list args;
     va_start(args, fmt);
 
@@ -48,7 +61,10 @@ static void _log(const char* fmt, ...)
 
 static void log_shutdown()
 {
-    fclose(logfile);
+    if (logfile) {
+        fclose(logfile);
+        logfile = nullptr;
+    }
 }
 
 #define log(...) _log(__VA_ARGS__)
@@ -238,7 +254,7 @@ static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
 }
 
 bool NukedSc55::Activate(const double requested_sample_rate,
-                         const uint32_t min_frame_count,
+                         [[maybe_unused]] const uint32_t min_frame_count,
                          const uint32_t max_frame_count)
 {
     log("Activate: requested_sample_rate: %g, min_frame_count: %d, max_frame_count: %d",
@@ -376,7 +392,7 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
     return CLAP_PROCESS_CONTINUE;
 }
 
-bool NukedSc55::LoadState(const clap_istream_t* stream)
+bool NukedSc55::LoadState([[maybe_unused]] const clap_istream_t* stream)
 {
     if (!emu) {
         return false;
@@ -386,7 +402,7 @@ bool NukedSc55::LoadState(const clap_istream_t* stream)
     return false;
 }
 
-bool NukedSc55::SaveState(const clap_ostream_t* stream)
+bool NukedSc55::SaveState([[maybe_unused]] const clap_ostream_t* stream)
 {
     if (!emu) {
         return 0;
@@ -396,7 +412,8 @@ bool NukedSc55::SaveState(const clap_ostream_t* stream)
     return 0;
 }
 
-void NukedSc55::Flush(const clap_input_events_t* in, const clap_output_events_t* out)
+void NukedSc55::Flush(const clap_input_events_t* in,
+                      [[maybe_unused]] const clap_output_events_t* out)
 {
     if (!emu) {
         return;
@@ -442,7 +459,7 @@ constexpr uint8_t PitchBend       = 0xe0;
 
 [[maybe_unused]] static void log_midi_message(const clap_event_midi_t* event)
 {
-    const auto status = event->data[0] & 0xf0;
+    const uint8_t status = static_cast<uint8_t>(event->data[0] & 0xf0U);
 
     // 3-byte messages
     switch (status) {
@@ -524,7 +541,7 @@ void NukedSc55::ResampleAndPublishFrames(const uint32_t num_out_frames,
 {
     log("RenderAndPublishFrames: num_out_frames: %d", num_out_frames);
 
-    const auto input_len  = render_buf[0].size();
+    const auto input_len  = static_cast<spx_uint32_t>(render_buf[0].size());
     const auto output_len = num_out_frames;
 
     log("  input_len: %d", input_len);
@@ -569,7 +586,7 @@ void NukedSc55::ResampleAndPublishFrames(const uint32_t num_out_frames,
 
         RenderAudio(render_frame_count);
 
-        in_len  = render_buf[0].size();
+        in_len  = static_cast<spx_uint32_t>(render_buf[0].size());
         out_len = num_out_frames_remaining;
 
         speex_resampler_process_float(resampler,
@@ -579,7 +596,7 @@ void NukedSc55::ResampleAndPublishFrames(const uint32_t num_out_frames,
                                       out_left + curr_out_pos,
                                       &out_len);
 
-        in_len  = render_buf[1].size();
+        in_len  = static_cast<spx_uint32_t>(render_buf[1].size());
         out_len = num_out_frames_remaining;
 
         speex_resampler_process_float(resampler,

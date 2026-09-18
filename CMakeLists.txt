@@ -74,15 +74,18 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #        linker cannot strip them individually. `/Gw` lets `/OPT:REF`
     #        garbage-collect the unreferenced tables, roughly halving the
     #        x64 Release DLL.
-    target_compile_options(Nuked-SC55-CLAP PRIVATE $<$<CONFIG:Release>:/Gw>)
+    # /W4 -- Enable level 4 warnings
+    # /WX -- Treat warnings as errors
+    # /wd4100 -- Disable "unreferenced formal parameter" (mirrors `-Wno-unused-parameter`)
+    # /Zc:preprocessor -- Conforming preprocessor
+    # /Zc:__cplusplus -- Report the real `__cplusplus` value
+    # /utf-8 -- UTF-8 source and execution charset
+    target_compile_options(Nuked-SC55-CLAP PRIVATE $<$<CONFIG:Release>:/Gw> /W4 /WX /wd4100 /Zc:preprocessor /Zc:__cplusplus /utf-8)
 
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
 
-    #add_compile_options(
-    #    /FI ${CMAKE_SOURCE_DIR}/example/config.h
-    #)
 
 #----------------------------------------------------------------------------
 # macOS
