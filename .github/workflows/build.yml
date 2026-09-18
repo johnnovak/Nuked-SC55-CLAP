@@ -54,7 +54,7 @@ jobs:
       - name: Install CMake
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: ~3.31.0
+          cmakeVersion: ~4.4.0
           ninjaVersion: latest
 
       - name: Set up vcpkg
