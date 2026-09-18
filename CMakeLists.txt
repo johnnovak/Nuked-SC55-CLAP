@@ -66,6 +66,16 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
     target_sources(Nuked-SC55-CLAP PRIVATE src/nuked_sc55_win32.manifest)
+
+    # /Gw -- Emit each global data item in its own COMDAT section.
+    #        The Nuked-SC55 backend embeds large static tables (notably the LCD
+    #        image and font bitmaps) that this GUI-less plug-in never references.
+    #        By default, MSVC groups a translation unit's globals together, so the
+    #        linker cannot strip them individually. `/Gw` lets `/OPT:REF`
+    #        garbage-collect the unreferenced tables, roughly halving the
+    #        x64 Release DLL.
+    target_compile_options(Nuked-SC55-CLAP PRIVATE $<$<CONFIG:Release>:/Gw>)
+
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
