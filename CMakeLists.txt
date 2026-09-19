@@ -88,12 +88,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # /utf-8 -- UTF-8 source and execution charset
     target_compile_options(Nuked-SC55-CLAP PRIVATE $<$<CONFIG:Release>:/Gw> /W4 /WX /wd4100 /Zc:preprocessor /Zc:__cplusplus /utf-8)
 
-    # ARM64EC: specify the ARM64EC target platform for the compiler and linker.
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64EC")
-        target_compile_options(Nuked-SC55-CLAP PRIVATE /arm64EC)
-        target_link_options(Nuked-SC55-CLAP PRIVATE /MACHINE:ARM64EC)
-    endif()
-
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)

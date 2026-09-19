@@ -92,6 +92,10 @@
         "strategy": "external"
       },
       "description": "Windows ARM64EC debug",
+      "environment": {
+        "CFLAGS": "/arm64EC",
+        "CXXFLAGS": "/arm64EC"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_SYSTEM_PROCESSOR": "ARM64EC",
@@ -107,6 +111,10 @@
         "strategy": "external"
       },
       "description": "Windows ARM64EC release",
+      "environment": {
+        "CFLAGS": "/arm64EC",
+        "CXXFLAGS": "/arm64EC"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_SYSTEM_PROCESSOR": "ARM64EC",
