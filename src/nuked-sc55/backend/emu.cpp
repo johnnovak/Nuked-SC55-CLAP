@@ -33,6 +33,7 @@
  */
 
 #include "emu.h"
+#include "diagnostics.h"
 #include "lcd.h"
 #include "mcu.h"
 #include "mcu_timer.h"
@@ -102,7 +103,7 @@ void Emulator::SetSampleCallback(mcu_sample_callback callback, void* userdata)
     m_mcu->sample_callback = callback;
 }
 
-bool Emulator::LoadRoms(Romset romset, const AllRomsetInfo& all_info, RomLocationSet* loaded)
+bool Emulator::LoadRoms(Romset romset, const RomsetInfo& info, RomLocationSet* loaded)
 {
     if (loaded)
     {
@@ -110,8 +111,6 @@ bool Emulator::LoadRoms(Romset romset, const AllRomsetInfo& all_info, RomLocatio
     }
 
     MCU_SetRomset(GetMCU(), romset);
-
-    const RomsetInfo& info = all_info.romsets[(size_t)romset];
 
     for (size_t i = 0; i < ROMLOCATION_COUNT; ++i)
     {
@@ -227,7 +226,7 @@ std::span<uint8_t> Emulator::MapBuffer(RomLocation location)
     case RomLocation::SMROM:
         return m_sm->rom;
     }
-    //fprintf(stderr, "FATAL: MapBuffer called with invalid location %d\n", (int)location);
+    Diag_Printf(Diag_Category::Error, "MapBuffer called with invalid location %d\n", (int)location);
     std::abort();
 }
 
@@ -237,10 +236,10 @@ bool Emulator::LoadRom(RomLocation location, std::span<const uint8_t> source)
 
     if (buffer.size() < source.size())
     {
-        //fprintf(stderr,
-        //        "FATAL: rom for %s is too large; max size is %d bytes\n",
-        //        ToCString(location),
-        //        (int)buffer.size());
+        Diag_Printf(Diag_Category::Error,
+                    "ROM for %s is too large; maximum size is %d bytes\n",
+                    ToCString(location),
+                    (int)buffer.size());
         return false;
     }
 
@@ -248,7 +247,7 @@ bool Emulator::LoadRom(RomLocation location, std::span<const uint8_t> source)
     {
         if (!std::has_single_bit(source.size()))
         {
-            //fprintf(stderr, "FATAL: %s requires a power-of-2 size\n", ToCString(location));
+            Diag_Printf(Diag_Category::Error, "%s requires a power-of-2 size\n", ToCString(location));
             return false;
         }
         GetMCU().rom2_mask = (uint32_t)source.size() - 1;
