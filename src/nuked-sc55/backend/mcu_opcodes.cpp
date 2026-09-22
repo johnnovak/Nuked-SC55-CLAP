@@ -82,7 +82,7 @@ int32_t MCU_SUB_Common(mcu_t& mcu, int32_t t1, int32_t t2, int32_t c_bit, MCU_Op
         break;
     default:
         // reason: siz provided always valid
-        std::unreachable();
+        std::abort();
     }
     MCU_SetStatus(mcu, N, STATUS_N);
     MCU_SetStatus(mcu, Z, STATUS_Z);
@@ -136,7 +136,7 @@ int32_t MCU_ADD_Common(mcu_t& mcu, int32_t t1, int32_t t2, int32_t c_bit, MCU_Op
         break;
     default:
         // reason: siz provided always valid
-        std::unreachable();
+        std::abort();
     }
     MCU_SetStatus(mcu, N, STATUS_N);
     MCU_SetStatus(mcu, Z, STATUS_Z);
@@ -859,7 +859,7 @@ void MCU_Opcode_Short_CMP(mcu_t& mcu, uint8_t opcode)
         break;
     default:
         // reason: initialized to one of the two values above
-        std::unreachable();
+        std::abort();
     }
     t1 = mcu.r[reg];
     MCU_SUB_Common(mcu, t1, t2, 0, siz);
@@ -1329,7 +1329,7 @@ void MCU_Opcode_SHLR(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
             break;
         default:
             // reason: operand_size set to one of these values in decoder
-            std::unreachable();
+            std::abort();
         }
         data <<= 1;
         MCU_Operand_Write(mcu, data);
@@ -1351,7 +1351,7 @@ void MCU_Opcode_SHLR(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
             break;
         default:
             // reason: operand_size set to valid value in decoder
-            std::unreachable();
+            std::abort();
         }
         data <<= 1;
         data |= bit;
@@ -1373,7 +1373,7 @@ void MCU_Opcode_SHLR(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
             break;
         default:
             // reason: operand_size set to valid value in decoder
-            std::unreachable();
+            std::abort();
         }
         data <<= 1;
         data |= (uint32_t)C;
@@ -1395,7 +1395,7 @@ void MCU_Opcode_SHLR(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
             break;
         default:
             // reason: operand_size set to valid value in decoder
-            std::unreachable();
+            std::abort();
         }
         data <<= 1;
         MCU_Operand_Write(mcu, data);
@@ -1419,7 +1419,7 @@ void MCU_Opcode_SHLR(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
             break;
         default:
             // reason: operand_size always set to valid value in decoder
-            std::unreachable();
+            std::abort();
         }
         data >>= 1;
         data |= msb;
@@ -1483,7 +1483,7 @@ void MCU_Opcode_MULXU(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg)
         break;
     default:
         // reason: operand_size always set to a valid value in decoder
-        std::unreachable();
+        std::abort();
     }
     Z = t1 == 0;
     MCU_SetStatus(mcu, N, STATUS_N);
