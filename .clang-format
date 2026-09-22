@@ -13,12 +13,12 @@
 
 # Use tabs, but only for indentation (lining up blocks of code).
 # Use space for indenting continuations (lining up long statements broken
-# into several lines).
+# into several lines.
 #
-UseTab: Never
-TabWidth: 4
-IndentWidth: 4
-ContinuationIndentWidth: 4
+UseTab: ForIndentation
+TabWidth: 8
+IndentWidth: 8
+ContinuationIndentWidth: 8
 
 ColumnLimit: 80
 
@@ -37,7 +37,7 @@ QualifierAlignment: Left
 
 # The extra indent or outdent of class access modifiers, e.g. public:
 #
-AccessModifierOffset: -4
+AccessModifierOffset: -8
 
 # Align parameters on the open bracket
 #
@@ -106,7 +106,7 @@ AlignOperands:  AlignAfterOperator
 #   #endif
 #   #endif
 #
-IndentPPDirectives: BeforeHash
+IndentPPDirectives: None
 
 # Always place function bodies on their own lines because
 # it makes a mess when some are on the same line and others are
@@ -224,7 +224,7 @@ InsertBraces: true
 #            { 7,     5,    "!!"}
 #        };
 #
-# AIAS_None (in configuration: None) Don't align array initializer columns.
+# AIAS_None (in configuration: None) Don’t align array initializer columns.
 #
 AlignArrayOfStructures: Right
 
