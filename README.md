@@ -165,7 +165,7 @@ libraries](#using-system-libs-on-linux-alternative-build-method).
 
 #### All platforms
 
-- CMake (3.27.0 or later)
+- CMake (3.25.0 or later)
 - vcpkg (latest)
 
 #### Windows
@@ -174,8 +174,8 @@ libraries](#using-system-libs-on-linux-alternative-build-method).
 
 #### macOS or Linux
 
-- Clang (16.0.0 or later)
-- Ninja (1.12.0 or later)
+- Clang (17.0.0 or later)
+- Ninja (1.13.2 or later)
 
 ### Installing vcpkg
 
