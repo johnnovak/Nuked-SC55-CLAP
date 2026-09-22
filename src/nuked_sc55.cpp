@@ -2,7 +2,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <ranges>
 #include <string>
 #include <string_view>
 
@@ -140,21 +139,42 @@ std::vector<std::filesystem::path> NukedSc55::GetRomEnvDirs()
     if (env_dir_list.empty()) {
         return paths;
     }
-    for (const auto env_dir : std::views::split(env_dir_list, PathSeparator)) {
-        auto dir = std::filesystem::path(std::string(env_dir.data(), env_dir.size()));
-        if (dir.is_relative()) {
-            log("Error: path is relative: %s", dir.string().c_str());
-            continue;
-        }
-        std::error_code ec;
-        if (!std::filesystem::is_directory(dir, ec)) {
-            if (ec) {
-                log("Error getting directory status: %s", ec.message().c_str());
+    // NOTE: this used to use std::views::split(env_dir_list, PathSeparator),
+    // but that relies on GCC's ranges implementation of split_view, which
+    // differs meaningfully between GCC 11 and GCC 13: on GCC 11 the inner
+    // range's begin()/end() are different types (iterator vs.
+    // default_sentinel_t), which std::string's iterator-pair constructor
+    // can't deduce against, while GCC 13 supports it. To avoid depending on
+    // that version-sensitive behaviour at all, this now does plain
+    // find()/substr() tokenizing instead.
+    constexpr char separator = PathSeparator[0];
+
+    size_t pos = 0;
+    while (pos <= env_dir_list.size()) {
+        const size_t next = env_dir_list.find(separator, pos);
+        const size_t len  = (next == std::string::npos) ? std::string::npos : next - pos;
+        const std::string token = env_dir_list.substr(pos, len);
+
+        if (!token.empty()) {
+            auto dir = std::filesystem::path(token);
+            if (dir.is_relative()) {
+                log("Error: path is relative: %s", dir.string().c_str());
+            } else {
+                std::error_code ec;
+                if (std::filesystem::is_directory(dir, ec)) {
+                    paths.push_back(dir);
+                } else if (ec) {
+                    log("Error getting directory status: %s", ec.message().c_str());
+                }
             }
-            continue;
         }
-        paths.push_back(dir);
+
+        if (next == std::string::npos) {
+            break;
+        }
+        pos = next + 1;
     }
+
     return paths;
 }
 
