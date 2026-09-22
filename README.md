@@ -1,8 +1,9 @@
 # Nuked SC-55 CLAP audio plug-in
 
-The Nuked SC-55 CLAP audio plug-in ([CLAP](https://cleveraudio.org/)) is built
-upon [J.C. Moyer's fork](https://github.com/jcmoyer/Nuked-SC55) of nukeykt's
-original [Nuked SC-55](https://github.com/nukeykt/Nuked-SC55) project.
+The **Nuked SC-55 CLAP** audio plug-in ([CLAP](https://cleveraudio.org/)) is
+built upon [J.C. Moyer's fork](https://github.com/jcmoyer/Nuked-SC55) of
+nukeykt's original [Nuked SC-55](https://github.com/nukeykt/Nuked-SC55)
+project.
 
 Contrary to the original Nuked-SC55 this plugin is based on, Nuked SC-55 CLAP
 has no graphical user interface. The plugin only reacts to MIDI messages, just
@@ -319,5 +320,6 @@ commands again.
 
 ## License
 
-Nuked SC-55 CLAP, based on Nuked SC-55, can be distributed and used under the
-GPL v2.0 or later license (see [LICENSE](LICENSE) file).
+Nuked SC-55 CLAP, based on [Nuked
+SC-55](https://github.com/nukeykt/Nuked-SC55), can be distributed and used
+under the GPL v2.0 or later license (see [LICENSE](LICENSE) file).
