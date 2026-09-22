@@ -320,8 +320,4 @@ commands again.
 ## License
 
 Nuked SC-55 CLAP, based on Nuked SC-55, can be distributed and used under the
-terms of original MAME license (see [LICENSE](LICENSE) file). As per the
-license, neither the code nor the published binaries may be used directly or
-indirectly for the creation of commercial Roland SC-55 emulation hardware
-boxes. Moreover, any use of the software in commercial music production is
-prohibited and so is including the plug-in in any commercial software package.
+GPL v2.0 or later license (see [LICENSE](LICENSE) file).
