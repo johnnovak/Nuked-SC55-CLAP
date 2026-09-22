@@ -12,10 +12,10 @@ SC-55ST](https://www.synthark.org/Roland/SC-55ST.html)). Future versions might
 include the emulation of the original hardware's LCD display or even a full
 custom GUI.
 
-The plug-in aims to preserve an important part of DOS gaming history for all
-to freely enjoy for posterity. It is only intended for **personal use** (e.g.,
-retro gaming or writing music as a hobby) and **research purposes**. See the
-[License](#license) section for additional details.
+> [!IMPORTANT]
+> The plug-in aims to preserve an important part of DOS gaming history for all
+> to freely enjoy for posterity. It is only intended for **personal use**
+> (e.g., retro gaming or writing music as a hobby) and **research purposes**.
 
 ## Installation
 
