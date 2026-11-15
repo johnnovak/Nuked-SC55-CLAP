@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <string_view>
 
@@ -304,7 +305,15 @@ bool NukedSc55::Activate(const double requested_sample_rate,
 	    min_frame_count,
 	    max_frame_count);
 
+	// Track the LCD from the boot on, but only for hosts that read it.
+	const bool track_lcd = lcd_requested;
+	if (track_lcd) {
+		emu->GetLCD().backend = &lcd_backend;
+	}
 	emu->Reset();
+	if (track_lcd) {
+		emu->StartLCD();
+	}
 	emu->GetPCM().enable_oversampling = false;
 	emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
@@ -457,6 +466,27 @@ bool NukedSc55::SaveState([[maybe_unused]] const clap_ostream_t* stream)
 
 	// TODO return actual number of bytes written once implemented
 	return 0;
+}
+
+bool NukedSc55::GetLcdState(nuked_sc55_lcd_state_t* state)
+{
+	if (!emu || !state) {
+		return false;
+	}
+
+	lcd_t& lcd = emu->GetLCD();
+
+	// The MCU updates the memories under this lock while it renders.
+	std::scoped_lock lock(lcd.mutex);
+
+	static_assert(sizeof(state->ddram) == sizeof(lcd.LCD_Data));
+	static_assert(sizeof(state->cgram) == sizeof(lcd.LCD_CG));
+
+	state->enabled = lcd.enable;
+	memcpy(state->ddram, lcd.LCD_Data, sizeof(state->ddram));
+	memcpy(state->cgram, lcd.LCD_CG, sizeof(state->cgram));
+
+	return true;
 }
 
 void NukedSc55::Flush(const clap_input_events_t* in,

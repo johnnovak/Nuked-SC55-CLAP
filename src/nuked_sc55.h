@@ -1,11 +1,13 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <filesystem>
 #include <memory>
 #include <vector>
 
 #include "clap/clap.h"
+#include "nuked-sc55-clap/lcd.h"
 #include "nuked-sc55/backend/emu.h"
 #include "speex/speex_resampler.h"
 
@@ -43,7 +45,32 @@ public:
 	bool LoadState(const clap_istream_t* stream);
 	bool SaveState(const clap_ostream_t* stream);
 
+	// LCD extension
+	void RequestLcd()
+	{
+		lcd_requested = true;
+	}
+	bool GetLcdState(nuked_sc55_lcd_state_t* state);
+
 private:
+	// The emulator only tracks the LCD state while it has a backend. This
+	// one draws nothing; the host reads the state through the LCD
+	// extension. It is only attached for hosts that asked for the extension.
+	class StateOnlyLcd : public LCD_Backend {
+	public:
+		bool Start(const lcd_t&) override
+		{
+			return true;
+		}
+		void Stop() override {}
+		void Render() override {}
+	};
+
+	StateOnlyLcd lcd_backend = {};
+
+	// Set when the host queries the LCD extension (any thread).
+	std::atomic<bool> lcd_requested = false;
+
 	std::filesystem::path path = {};
 
 	Model model = {};
