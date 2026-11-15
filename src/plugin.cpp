@@ -153,6 +153,13 @@ static const clap_plugin_state_t extension_state = {
 	        return the_plugin->LoadState(stream);
         }};
 
+static const nuked_sc55_plugin_lcd_t extension_lcd = {
+        .get_state = [](const clap_plugin_t* plugin,
+                        nuked_sc55_lcd_state_t* state) -> bool {
+	        auto the_plugin = (NukedSc55*)plugin->plugin_data;
+	        return the_plugin->GetLcdState(state);
+        }};
+
 //////////////////////////////////////////////////////////////////////////////
 // Plugin classes
 //////////////////////////////////////////////////////////////////////////////
@@ -167,6 +174,11 @@ static const void* get_extension(const clap_plugin* plugin, const char* id)
 
 	} else if (strcmp(id, CLAP_EXT_STATE) == 0) {
 		return &extension_state;
+
+	} else if (strcmp(id, NUKED_SC55_EXT_LCD) == 0) {
+		auto the_plugin = (NukedSc55*)plugin->plugin_data;
+		the_plugin->RequestLcd();
+		return &extension_lcd;
 
 	} else {
 		return nullptr;
