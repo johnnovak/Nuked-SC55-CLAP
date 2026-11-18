@@ -154,6 +154,20 @@ SC-55mk2-v1.01/waverom1.bin
 SC-55mk2-v1.01/waverom2.bin
 ```
 
+## Extra features
+
+### LCD extension
+
+Hosts that want to show the SC-55's front-panel display can read the state of
+the emulated LCD controller through the custom CLAP extension
+`com.johnnovak.nuked-sc55.lcd/1`. It returns the controller's character memory
+(DD RAM and CG RAM) and whether the display is switched on. Drawing the
+display, including the controller's character font, is up to the host. See
+`include/nuked-sc55-clap/lcd.h` for the details.
+
+The plugin only emulates the LCD for hosts that query the extension before
+activating the plugin. For hosts that don't, the LCD costs no CPU time.
+
 ## Building
 
 The main build method is via CMake and vcpkg. This is what the CI workflow
